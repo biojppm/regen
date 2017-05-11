@@ -1,0 +1,8 @@
+README.html
+
+.python-version
+*.pyc
+__pycache__/
+regen.egg-info/
+/build/
+/dist/
