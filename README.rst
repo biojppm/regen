@@ -21,20 +21,18 @@ Enum stringification
 
 Consider a C++ header, let's name it `myenum.h`::
 
-.. code:: c++
-  #pragma once
+    #pragma once
 
-  C4_ENUM()
-  typedef enum {
-    FOO,
-    BAR,
-    BAZ
-  } MyEnum;
+    C4_ENUM()
+    typedef enum {
+      FOO,
+      BAR,
+      BAZ
+    } MyEnum;
 
 Now use the following generation code which specifies the templates, saved as
 `regen.py`::
 
-.. code:: python
     import c4.regen as regen
 
     egen = regen.EnumGenerator(
@@ -70,12 +68,10 @@ Now use the following generation code which specifies the templates, saved as
 
 Now generate the code::
 
-.. code:: bash
     python regen.py myenum.h
 
-The command above generates `myenum.gen.h`...:
+The command above generates `myenum.gen.h`...::
 
-.. code:: c++
     #ifndef _MYENUM_GEN_H_
     #define _MYENUM_GEN_H_
 
@@ -85,9 +81,8 @@ The command above generates `myenum.gen.h`...:
     template<> const EnumPairs< MyEnum > enum_pairs();
     #endif // _MYENUM_GEN_H_
 
-and `myenum.gen.cpp`:
+and `myenum.gen.cpp`::
 
-.. code:: c++
     #include "myenum.gen.h"
 
     template<> const EnumPairs< MyEnum > enum_pairs()
@@ -109,9 +104,9 @@ Running
 `regen` uses `libclang-py3 <https://pypi.python.org/pypi/libclang-py3>`_,
 which is a python wrapper for the libclang library. The current version of
 libclang-py3 requires libclang 3.9. You may need to alter ``LD_LIBRARY_PATH``
-so that libclang can be found. For example:
-.. code:: bash
-  LD_LIBRARY_PATH=$(llvm-config-3.9 --libdir) python regen.py myenum.h
+so that libclang can be found. For example::
+
+    LD_LIBRARY_PATH=$(llvm-config-3.9 --libdir) python regen.py myenum.h
 
 (This version dependency needs to be fixed).
 
@@ -119,27 +114,23 @@ so that libclang can be found. For example:
 Installing
 ----------
 
-.. highlight:: bash
-
 From PyPi
 ^^^^^^^^^
 
 Installation is easy with the Python package repository. This will install
 pip along with its dependencies::
-  pip install regen
+    pip install regen
 
 From source
 ^^^^^^^^^^^
 To install from source::
-.. code:: bash
     git clone https://github.com/biojppm/regen.git
     cd regen
     pip install .
 
 For development
 ^^^^^^^^^^^^^^^
-Setting up regen for development is easy:
-.. code:: bash
+Setting up regen for development is easy::
     git clone https://github.com/biojppm/regen.git
     cd regen
     pip install -r requirements_dev.txt
@@ -156,12 +147,3 @@ cmany is permissively licensed under the `MIT license`_.
    :target: https://opensource.org/licenses/MIT
 
 .. http://stackoverflow.com/questions/10870719/inline-code-highlighting-in-restructuredtext
-
-.. role:: bash(code)
-   :language: bash
-
-.. role:: cpp(code)
-   :language: cpp
-
-.. role:: python(code)
-   :language: python
