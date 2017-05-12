@@ -1,13 +1,16 @@
+
+===========  ===========
+ |pypi|       |license|
+===========  ===========
+
 regen
 =====
-
-|license|
 
 `regen` is a python3 package providing C/C++ reflection and source-code
 generation. It uses the AST provided by LLVM's libclang, which is processed
 by user-provided source-code generators to automatically generate C/C++
 source code. This is done via a `template engine (jinja2)
-<http://jinja.pocoo.org/`_ for generating the code. Examples of application
+<http://jinja.pocoo.org/>`_ for generating the code. Examples of application
 are maintenance-free enum strings, object-tree serialization or property
 systems with arbitrary per-property annotations.
 
@@ -19,7 +22,9 @@ Quick examples
 Enum stringification
 ^^^^^^^^^^^^^^^^^^^^
 
-Consider a C++ header, let's name it `myenum.h`::
+Consider a C++ header, let's name it `myenum.h`:
+
+.. code:: c++
 
     #pragma once
 
@@ -30,8 +35,10 @@ Consider a C++ header, let's name it `myenum.h`::
       BAZ
     } MyEnum;
 
-Now use the following generation code which specifies the templates, saved as
-`regen.py`::
+Now use the following python code for parsing and generating, saved as
+`regen.py`:
+
+.. code:: python
 
     import c4.regen as regen
 
@@ -66,11 +73,15 @@ Now use the following generation code which specifies the templates, saved as
     if __name__ == "__main__":
         regen.run(writer, egen, [])
 
-Now generate the code::
+Now generate the code:
+
+.. code:: bash
 
     python regen.py myenum.h
 
-The command above generates `myenum.gen.h`...::
+The command above generates `myenum.gen.h`:
+
+.. code:: c++
 
     #ifndef _MYENUM_GEN_H_
     #define _MYENUM_GEN_H_
@@ -81,7 +92,9 @@ The command above generates `myenum.gen.h`...::
     template<> const EnumPairs< MyEnum > enum_pairs();
     #endif // _MYENUM_GEN_H_
 
-and `myenum.gen.cpp`::
+and also `myenum.gen.cpp`:
+
+.. code:: c++
 
     #include "myenum.gen.h"
 
@@ -119,22 +132,29 @@ From PyPi
 
 Installation is easy with the Python package repository. This will install
 pip along with its dependencies::
+
     pip install regen
 
 From source
 ^^^^^^^^^^^
-To install from source::
+
+.. code:: bash
+
     git clone https://github.com/biojppm/regen.git
     cd regen
     pip install .
 
 For development
 ^^^^^^^^^^^^^^^
-Setting up regen for development is easy::
+Setting up regen for development is easy:
+
+.. code:: bash
+
     git clone https://github.com/biojppm/regen.git
     cd regen
     pip install -r requirements_dev.txt
     pip install -e .
+
 
 License
 -------
@@ -142,8 +162,10 @@ cmany is permissively licensed under the `MIT license`_.
 
 .. _MIT license: LICENSE.txt
 
+.. |pypi| image:: https://img.shields.io/pypi/v/regen.svg
+      :alt: Version
+      :target: https://pypi.python.org/pypi/regen/
+
 .. |license| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :alt: License: MIT
    :target: https://opensource.org/licenses/MIT
-
-.. http://stackoverflow.com/questions/10870719/inline-code-highlighting-in-restructuredtext
