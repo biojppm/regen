@@ -7,99 +7,125 @@ import subprocess
 import tempfile
 import ccsyspath
 from shutil import which
+import sys
 
-from .util import dbg
+from .util import dbg, cacheattr
 
 clang_version = "3.8"
-default_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
-                   | TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
-                   # | TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
-                   )
-inc_path = ["-I{}".format(str(i,'utf-8'))
-            for i in ccsyspath.system_include_paths('clang++')]
-idx = None
-
+clang_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+                 | TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
+                 # | TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
+)
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-def load_clang(libdir=None, version=clang_version):
-    def _dbg(*args, **kwargs): dbg("loading clang:", *args, **kwargs)
-    _dbg("libdir=", libdir, "version=", version)
-    _dbg("LD_LIBRARY_PATH=", os.environ["LD_LIBRARY_PATH"])
-    _dbg("PATH=", os.environ["PATH"])
-    if libdir is None:
-        exe = find_llvm_config(version)
-        _dbg("llvm-config=", exe)
-        if exe is None:
-            msg = "could not find a suitable llvm-config executable. Searched version {}"
-            raise Exception(msg.format(version))
-        libdir = subprocess.getoutput(exe + " --libdir")
-        _dbg("libdir=", libdir)
-    if libdir is not None:
-        clang.cindex.Config.set_library_path(libdir)  # this doesn't work, at least in Ubuntu 16.04 x64
-        libname = "libclang.so"  # FIXME for windows
-        lib = os.path.join(libdir, libname)
-        _dbg("lib=", lib)
-        assert os.path.exists(lib)
-        clang.cindex.Config.set_library_file(lib)
+def load_clang(libdir=None): #, version=clang_version):
+    def _doit(libdir):
+        version = clang_version
+        def _dbg(*args, **kwargs): dbg("loading clang:", *args, **kwargs)
+        _dbg("libdir=", libdir, "version=", version)
+        _dbg("LD_LIBRARY_PATH=", os.environ["LD_LIBRARY_PATH"])
+        _dbg("PATH=", os.environ["PATH"])
+        if libdir is None:
+            exe = find_llvm_config(version)
+            _dbg("llvm-config=", exe)
+            if exe is None:
+                msg = "could not find a suitable llvm-config executable. Searched version {}"
+                raise Exception(msg.format(version))
+            libdir = subprocess.getoutput(exe + " --libdir")
+            _dbg("libdir=", libdir)
+        if libdir is not None:
+            clang.cindex.Config.set_library_path(libdir)  # this doesn't work, at least in Ubuntu 16.04 x64
+            libname = "libclang.so"  # FIXME for windows
+            lib = os.path.join(libdir, libname)
+            _dbg("lib=", lib)
+            if not os.path.exists(lib):
+                _dbg("lib not found!")
+                raise Exception("lib not found: " + lib)
+            assert os.path.exists(lib)
+            clang.cindex.Config.set_library_file(lib)
+        return lib
+    return cacheattr(sys.modules[__name__], 'clang_loaded', lambda: _doit(libdir))
 
 
 def find_llvm_config(version=clang_version):
-    def _dbg(*args, **kwargs): dbg("looking for llvm-config:", *args, **kwargs)
-    _dbg("version", version)
-    exe = which("llvm-config")
-    _dbg("'llvm-config' in path?")
-    if exe is None:
-        _dbg("'llvm-config' not found")
-    else:
-        _dbg("'llvm-config' found:", exe)
-        llvmc_version = subprocess.getoutput(exe + " --version")
-        _dbg("'llvm-config' version:", llvmc_version)
-        majmin = ".".join(llvmc_version.split(".")[0:2])
-        ref = ".".join(version.split(".")[0:2])
-        if majmin == ref:
-            _dbg("'llvm-config' version ok")
-            return exe
+    def _getit():
+        def _dbg(*args, **kwargs): dbg("looking for llvm-config:", *args, **kwargs)
+        _dbg("version", version)
+        exe = which("llvm-config")
+        _dbg("'llvm-config' in path?")
+        if exe is None:
+            _dbg("'llvm-config' not found")
         else:
-            _dbg("'llvm-config' version not ok")
-            exe = None
-    ver = "llvm-config-" + version
-    _dbg(ver, "in path?")
-    exe = which(ver)
-    if exe is not None:
-        _dbg("found", ver, ":", exe)
-    else:
-        _dbg("not found", ver, ":", exe)
-    return exe
+            _dbg("'llvm-config' found:", exe)
+            llvmc_version = subprocess.getoutput(exe + " --version")
+            _dbg("'llvm-config' version:", llvmc_version)
+            majmin = ".".join(llvmc_version.split(".")[0:2])
+            ref = ".".join(version.split(".")[0:2])
+            if majmin == ref:
+                _dbg("'llvm-config' version ok")
+                return exe
+            else:
+                _dbg("'llvm-config' version not ok")
+                exe = None
+        ver = "llvm-config-" + version
+        _dbg(ver, "in path?")
+        exe = which(ver)
+        if exe is not None:
+            _dbg("found", ver, ":", exe)
+        else:
+            _dbg("not found", ver, ":", exe)
+        return exe
+    return cacheattr(sys.modules[__name__], 'llvm_config', _getit)
+
+
+def get_inc_path():
+    def _getit():
+        def _dbg(*args, **kwargs): dbg("clang include path:", *args, **kwargs)
+        llvmc = find_llvm_config()
+        bindir = subprocess.getoutput(llvmc + " --bindir")
+        clangexe = os.path.join(bindir, 'clang++')
+        _dbg("clang++:", clangexe)
+        if not os.path.exists(clangexe):
+            raise Exception("could not find clang++: " + clangexe)
+        incpaths = ccsyspath.system_include_paths(clangexe)
+        for p in incpaths:
+            _dbg("clang++ include paths:", str(p))
+        return ["-I {}".format(str(i, 'utf-8')) for i in incpaths]
+    return cacheattr(sys.modules[__name__], 'clang_inc_path', _getit)
 
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-def parse_file(filename, args=[], options=default_options):
+def parse_file(filename, args=[], options=clang_options):
+    ip = get_inc_path()
+    dbg("parse_file:", filename, ": args=", args)
+    dbg("parse_file:", filename, ": inc_path=", ip)
+    args += ip
     def _e(diags=None):
-        msg = "unable to parse file {}{}.{}"
-        msg = msg.format(filename,
-                         ": " + str(args) if args else "",
-                         get_diagnostics_string(diags))
+        msg = "{}: parse error: {}"
+        msg = msg.format(filename, get_diagnostics_string(diags))
+        if args:
+            msg += "{}: args={}".format(filename, args)
         return msg
-    global idx
-    if idx is None:
-        idx = clang.cindex.Index.create()
+    idx = cacheattr(sys.modules[__name__], 'clang_idx',
+                    lambda: clang.cindex.Index.create())
     try:
-        tu = idx.parse(path=filename, args=args + inc_path, options=options)
+        tu = idx.parse(path=filename, args=args + ip, options=options)
         if tu.diagnostics:
-            raise Exception(_e(tu.diagnostics))
+            print(_e(tu.diagnostics))
     except:
-        raise Exception(_e(tu.diagnostics))
+        if tu:
+            raise Exception(_e(tu.diagnostics))
     if not tu:
         raise Exception(_e())
     return tu
 
 
-def parse_source(source, args=[], options=default_options):
+def parse_source(source, args=[], options=clang_options):
     """@TODO is there a better way to accomplish this without writing a temporary file?"""
     f, n = tempfile.mkstemp(prefix='regen', suffix='.cpp')
     with open(n, "w") as f:
