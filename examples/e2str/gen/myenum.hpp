@@ -2,6 +2,7 @@
 #define _MYENUM_HPP_
 
 #include "enum.hpp"
+#define C4_ENUM()
 
 C4_ENUM() // tag this enum for extraction
 typedef enum {

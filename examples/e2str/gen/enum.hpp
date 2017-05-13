@@ -50,7 +50,9 @@ private:
  * Failure to provide a specialization will cause a linker error. */
 template< class T >
 EnumSymbols< T > const esyms();
-/** SPECIALIZE! This needs to be specialized for each C++11 enum class type. */
+/** return the offset at which the enum symbol starts. For example,
+ * eoffs< MyEnumClass >() would be 13=strlen("MyEnumClass::")
+ * SPECIALIZE! This needs to be specialized for each C++11 enum class type. */
 template< class T >
 size_t eoffs()
 {
@@ -142,119 +144,5 @@ bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
 
     return false;
 }
-
-//-----------------------------------------------------------------------------
-#define _A5_ENUM_SYM_PAIR(e) {e, #e}
-
-#define A5_ENUM_SYMS(macr) macr(_A5_ENUM_SYM_VAL)
-#define A5_ENUM_STRS(enum_type, macr) \
-\
-template<> \
-inline EnumSymbols< enum_type > const esyms< enum_type >() \
-{\
-    static typename EnumSymbols< enum_type >::Sym const pairs[] = {\
-        macr(_A5_ENUM_SYM_PAIR)\
-    };\
-    return EnumSymbols< enum_type >(pairs);\
-}
-
-#define A5_ENUM_CLASS_STRS(enum_class, macr) \
-\
-A5_ENUM_STRS(enum_class, macr) \
-\
-template<> \
-inline size_t eoffs< enum_class >()\
-{\
-    return strlen(#enum_class "::");\
-}
-
-//-----------------------------------------------------------------------------
-#define _C4_ENUM_SYM_VAL(cl, e, v) e v
-#define _C4_ENUM_SYM_PAIR(cl, e, v) {cl e, #cl #e}
-
-#define C4_ENUM_SYMS(macr) macr(_C4_ENUM_SYM_VAL)
-#define C4_ENUM_STRS(enum_type, macr) \
-\
-template<> \
-inline EnumSymbols< enum_type > const esyms< enum_type >() \
-{\
-    static typename EnumSymbols< enum_type >::Sym const pairs[] = {\
-        macr(_C4_ENUM_SYM_PAIR)\
-    };\
-    return EnumSymbols< enum_type >(pairs);\
-}\
-
-#define C4_ENUM_CLASS_STRS(enum_class, macr) \
-\
-C4_ENUM_STRS(enum_class, macr) \
-\
-template<> \
-inline size_t eoffs< enum_class >()\
-{\
-    return strlen(#enum_class "::");\
-}
-
-#define C4_ENUM(enum_name, macr) \
-enum enum_name { \
-    C4_ENUM_SYMS(macr) \
-}; \
-C4_ENUM_STRS(enum_name, macr)
-
-#define C4_ENUM_TYPEDEF(enum_type, macr) \
-typedef enum { \
-    C4_ENUM_SYMS(macr) \
-} enum_type; \
-C4_ENUM_STRS(enum_type, macr)
-
-#define C4_ENUM_CLASS(enum_class, macr) \
-enum class enum_class { \
-    C4_ENUM_SYMS(macr) \
-}; \
-C4_ENUM_CLASS_STRS(enum_class, macr)
-
-//-----------------------------------------------------------------------------
-
-#define _C5_ENUM_SYM_VAL(e) e
-#define _C5_ENUM_SYM_PAIR(cl, e, v) {cl e, #cl #e}
-
-#define C5_ENUM_SYMS(...) _C4_FOR_EACH(_C5_ENUM_VAL, __VA_ARGS___)
-#define C5_ENUM_STRS(enum_type, macr) \
-\
-template<> \
-inline EnumSymbols< enum_type > const esyms< enum_type >() \
-{\
-    static typename EnumSymbols< enum_type >::Sym const pairs[] = {\
-        macr(_C5_ENUM_SYM_PAIR)\
-    };\
-    return EnumSymbols< enum_type >(pairs);\
-}\
-
-#define C5_ENUM_CLASS_STRS(enum_class, macr) \
-\
-C5_ENUM_STRS(enum_class, macr) \
-\
-template<> \
-inline size_t eoffs< enum_class >()\
-{\
-    return strlen(#enum_class "::");\
-}
-
-#define C5_ENUM(enum_name, macr) \
-enum enum_name { \
-    C5_ENUM_SYMS(macr) \
-}; \
-C5_ENUM_STRS(enum_name, macr)
-
-#define C5_ENUM_TYPEDEF(enum_type, macr) \
-typedef enum { \
-    C5_ENUM_SYMS(macr) \
-} enum_type; \
-C5_ENUM_STRS(enum_type, macr)
-
-#define C5_ENUM_CLASS(enum_class, macr) \
-enum class enum_class { \
-    C5_ENUM_SYMS(macr) \
-}; \
-C5_ENUM_CLASS_STRS(enum_class, macr)
 
 #endif // _C4_ENUM_HPP_
