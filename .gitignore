@@ -1,5 +1,6 @@
 README.html
 
+.noseids
 .python-version
 *.pyc
 __pycache__/
