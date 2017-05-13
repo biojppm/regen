@@ -1,16 +1,19 @@
 import clang.cindex
-from clang.cindex import CursorKind,TranslationUnit
+from clang.cindex import CursorKind, TranslationUnit
 import os.path
-import asciitree # must be version 0.2+
+import asciitree  # must be version 0.2+
 from collections import OrderedDict as odict
 import subprocess
 import tempfile
 import ccsyspath
+from shutil import which
 
 version_default = "3.8"
 version_fallback = ["4.0", "3.9", "3.8", "3.7", "3.6", "3.5"]
 default_options = TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD|TranslationUnit.PARSE_SKIP_FUNCTION_BODIES#|TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
 inc_path = ["-I{}".format(str(i,'utf-8')) for i in ccsyspath.system_include_paths('clang++')]
+from .util import dbg
+
 idx = None
 
 #-------------------------------------------------------------------------------
@@ -18,6 +21,9 @@ idx = None
 #-------------------------------------------------------------------------------
 
 def load_clang(libdir=None, version=version_default, fallbacks=version_fallback):
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
     if libdir is None:
         exe = find_llvm_config(version, fallbacks)
         if exe is None:
@@ -49,9 +55,9 @@ def find_clang_libdir(llvm_config_executable):
     return libdir
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def parse_file(filename, args=[], options=default_options):
     def _e(diags=None):
         msg = "unable to parse file {}{}.{}"
@@ -75,13 +81,13 @@ def parse_file(filename, args=[], options=default_options):
 
 def parse_source(source, args=[], options=default_options):
     """@TODO is there a better way to accomplish this without writing a temporary file?"""
-    f,n = tempfile.mkstemp(prefix='regen', suffix='.cpp')
-    f = open(n, "w")
-    if isinstance(source, str):
-        f.write(source)
-    elif isinstance(source, list):
-        f.writelines(source)
-    f.close()
+    f, n = tempfile.mkstemp(prefix='regen', suffix='.cpp')
+    with open(n, "w") as f:
+        if isinstance(source, str):
+            f.write(source)
+        elif isinstance(source, list):
+            f.writelines(source)
+        f.close()
     tu = parse_file(n, args, options)
     os.remove(n)
     return tu
@@ -100,11 +106,12 @@ def get_diagnostics_string(diags):
     return s
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def same_trans_unit(node, trans_unit):
-    return node.location.file and node.location.file.name == trans_unit.cursor.displayname
+    return (node.location.file
+            and node.location.file.name == trans_unit.cursor.displayname)
 
 
 def file(node):
@@ -131,7 +138,7 @@ def get_node_children_in_translation_unit(node, trans_unit):
     return [c for c in node.get_children() if same_trans_unit(c, trans_unit)]
 
 
-def find_nodes(root_node, node_kinds, node_names = None, trans_unit = None, descend = True):
+def find_nodes(root_node, node_kinds, node_names=None, trans_unit=None, descend=True):
     """
     Visit the tree starting at root_node, get all nodes of node_kind
     and (optionally) equal to node_name.
@@ -155,7 +162,9 @@ def find_nodes(root_node, node_kinds, node_names = None, trans_unit = None, desc
 
 
 def find_function(trans_unit, function_name):
-    nodes = find_nodes(trans_unit.cursor, [clang.cindex.CursorKind.FUNCTION_DECL], function_name, trans_unit)
+    nodes = find_nodes(trans_unit.cursor,
+                       [clang.cindex.CursorKind.FUNCTION_DECL],
+                       function_name, trans_unit)
     if len(nodes) == 0:
         return None
     else:
@@ -164,7 +173,9 @@ def find_function(trans_unit, function_name):
 
 
 def find_macro_instantiations(trans_unit, macro_name):
-    return find_nodes(trans_unit.cursor, [CursorKind.MACRO_INSTANTIATION], macro_name, trans_unit)
+    return find_nodes(trans_unit.cursor,
+                      [CursorKind.MACRO_INSTANTIATION],
+                      macro_name, trans_unit)
 
 
 def find_node_with_offset(cursor, line_offset, column_offset):
@@ -199,9 +210,9 @@ def find_enclosing_class_node(node):
     return n
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def is_enum_class(enum_cursor):
     # TODO: HACK.......
@@ -216,15 +227,15 @@ def underlying_type(enum_cursor):
     raise Exception("not implemented")
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def is_template(cursor):
     k = cursor.kind
-    return (k == CursorKind.FUNCTION_TEMPLATE or
-        k == CursorKind.CLASS_TEMPLATE or
-        k == CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION
+    return (k == CursorKind.FUNCTION_TEMPLATE
+            or k == CursorKind.CLASS_TEMPLATE
+            or k == CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION
     )
 
 
@@ -235,9 +246,10 @@ def find_template_parameters(cursor):
                                CursorKind.TEMPLATE_TEMPLATE_PARAMETER],
                       descend=False)
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def get_comment(cursor, skip_macro_call_above_line=False):
     prev = get_comment_prev_line(cursor, skip_macro_call_above_line)
@@ -271,14 +283,15 @@ def get_comment_tokens(trans_unit, at_line=None, outside_of_cursor=None):
     return l
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def print_ast(trans_unit, start_node=None, with_tokens=False):
     def _get_node_children(node):
         return [c for c in node.get_children()
-                if (c.location.file and c.location.file.name == trans_unit.cursor.displayname)
+                if (c.location.file
+                    and c.location.file.name == trans_unit.cursor.displayname)
         ]
     def _print_node(node):
         text = node.spelling or node.displayname
@@ -289,25 +302,30 @@ def print_ast(trans_unit, start_node=None, with_tokens=False):
             txt += "\n"
             txt += get_tokens_string(node.get_tokens())
         return txt
-    if start_node == None: start_node = trans_unit.cursor
+    if start_node is None:
+        start_node = trans_unit.cursor
     print(asciitree.draw_tree(start_node, _get_node_children, _print_node))
 
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class IncludeList:
     def __init__(self, file):
         self.file = os.path.abspath(file)
         self.incs = None
+
     def append(self, line, inc):
         il = IncludeList(inc)
-        if self.incs is None: self.incs = odict()
+        if self.incs is None:
+            self.incs = odict()
         self.incs[int(line)] = il
         return il
-    def printrec(self, istack = 0, sep='  '):
-        if self.incs is None: return
-        for line,inc in self.incs.items():
+
+    def printrec(self, istack=0, sep='  '):
+        if self.incs is None:
+            return
+        for line, inc in self.incs.items():
             f = str(self.file).lstrip(" ").rstrip(" ")
             i = str(inc.file).lstrip(" ").rstrip(" ")
             print(istack * sep, "{0}:{1}: #include \"{2}\"".format(f, line, i))
