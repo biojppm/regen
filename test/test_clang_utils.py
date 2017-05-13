@@ -198,19 +198,19 @@ class Test3GetComments(CluTest):
                 for e in ('FOO', 'BAR', 'BAZ'):
                     sc = c.format(e + " means " + e.lower())
                     d[e] = sc
-                    s += "{}\n{},\n".format(sc, e) if i == 0 else "{},{}\n".format(e, sc)
-                s = (comm +
-"""
-typedef enum {{
-{}
-}} Whatever;
-""".format(s))
+                    if i == 0:
+                        s += "  {}\n{},\n".format(sc, e)
+                    else:
+                        s += "  {},{}\n".format(e, sc)
+                s = (comm + "\ntypedef enum {{\n{} }} Whatever;".format(s))
                 d['src'] = s
                 l.append(d)
         for d in l:
             src, tu = self._parse(d['src'])
             clu.print_ast(tu)
-            typedef_nodes = clu.find_nodes(tu.cursor, clang.cindex.CursorKind.TYPEDEF_DECL, descend=False)
+            typedef_nodes = clu.find_nodes(tu.cursor,
+                                           clang.cindex.CursorKind.TYPEDEF_DECL,
+                                           descend=False)
             self.assertEqual(len(typedef_nodes), 1)
             td = typedef_nodes[0]
             ch = list(td.get_children())
