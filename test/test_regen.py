@@ -2,6 +2,10 @@ import c4.regen as regen
 import unittest as ut
 import re
 
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class Test0FilenameUtils(ut.TestCase):
 
     def test_ext(self):
@@ -22,6 +26,9 @@ class Test0FilenameUtils(ut.TestCase):
         self.assertEqual(regen.inc_guard('path\\to\\filename.hpp'), '_PATH_TO_FILENAME_HPP_')
 
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class Test1Splitlines(ut.TestCase):
 
     def test(self):
@@ -36,6 +43,9 @@ class Test1Splitlines(ut.TestCase):
         self.assertEqual(regen.splitlines("line1\n\nline2\n\n"), ["line1\n", "\n", "line2\n", "\n"])
 
 
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class Test2Pump(ut.TestCase):
 
     def test0_unique(self):
@@ -94,20 +104,14 @@ class Test2Pump(ut.TestCase):
         self.assertEqual(outlines, reflines)
 
 
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-if __name__ == '__main__':
-    ut.main()
-
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 class PumpTestCases:
 
-    content = (
-"""This is a multi-line thing.
+    content = ("""\
+This is a multi-line thing.
 If you don't like it, well,
 you can do something else with it.
 """)
@@ -115,17 +119,17 @@ you can do something else with it.
     tag = "// tag"
 
     # input with no tags
-    in0 = (
-"""line1
+    in0 = ("""\
+line1
 line2
 """)
-    out0 = (
-"""line1
+    out0 = ("""\
+line1
 line2
 ____content____
 """)
-    nested_in0 = (
-"""#ifndef BLA
+    nested_in0 = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -135,8 +139,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_out0 = (
-"""#ifndef BLA
+    nested_out0 = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -149,38 +153,38 @@ ____content____
 """)
 
     # input only with single tag
-    in1 = (
-"""line1
+    in1 = ("""\
+line1
 // tag
 line2
 """)
-    out1 = (
-"""line1
+    out1 = ("""\
+line1
 ____content____
 line2
 """)
-    in1b = (
-"""// tag
+    in1b = ("""\
+// tag
 line2
 line3
 """)
-    out1b = (
-"""____content____
+    out1b = ("""\
+____content____
 line2
 line3
 """)
-    in1e = (
-"""line1
+    in1e = ("""\
+line1
 line2
 // tag
 """)
-    out1e = (
-"""line1
+    out1e = ("""\
+line1
 line2
 ____content____
 """)
-    nested_in1b = (
-"""#ifndef BLA
+    nested_in1b = ("""\
+#ifndef BLA
 #define BLA
 // tag
 #   ifndef FOO
@@ -191,8 +195,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_out1b = (
-"""#ifndef BLA
+    nested_out1b = ("""\
+#ifndef BLA
 #define BLA
 ____content____
 #   ifndef FOO
@@ -203,8 +207,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_in1e = (
-"""#ifndef BLA
+    nested_in1e = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -215,8 +219,8 @@ ____content____
 // tag
 #endif // !BLA
 """)
-    nested_out1e = (
-"""#ifndef BLA
+    nested_out1e = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -229,41 +233,41 @@ ____content____
 """)
 
     # input with begin+end tag
-    in2 = (
-"""line1
+    in2 = ("""\
+line1
 // tag
 // tag
 line4
 """)
-    out2 = (
-"""line1
+    out2 = ("""\
+line1
 ____content____
 line4
 """)
-    in2b = (
-"""// tag
+    in2b = ("""\
+// tag
 // tag
 line3
 line4
 """)
-    out2b = (
-"""____content____
+    out2b = ("""\
+____content____
 line3
 line4
 """)
-    in2e = (
-"""line1
+    in2e = ("""\
+line1
 line2
 // tag
 // tag
 """)
-    out2e = (
-"""line1
+    out2e = ("""\
+line1
 line2
 ____content____
 """)
-    nested_in2b = (
-"""#ifndef BLA
+    nested_in2b = ("""\
+#ifndef BLA
 #define BLA
 // tag
 // tag
@@ -275,8 +279,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_out2b = (
-"""#ifndef BLA
+    nested_out2b = ("""\
+#ifndef BLA
 #define BLA
 ____content____
 #   ifndef FOO
@@ -287,8 +291,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_in2e = (
-"""#ifndef BLA
+    nested_in2e = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -300,8 +304,8 @@ ____content____
 // tag
 #endif // !BLA
 """)
-    nested_out2e = (
-"""#ifndef BLA
+    nested_out2e = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -316,14 +320,14 @@ ____content____
     btag = tag + ": BEGIN"
     etag = tag + ": END"
     # input with different begin+end tag
-    in2d = (
-"""line1
+    in2d = ("""\
+line1
 // tag: BEGIN
 // tag: END
 line3
 """)
-    out2d = (
-"""line1
+    out2d = ("""\
+line1
 ____content____
 line3
 """)
@@ -333,24 +337,24 @@ line3
 line3
 line4
 """)
-    out2db = (
-"""____content____
+    out2db = ("""\
+____content____
 line3
 line4
 """)
-    in2de = (
-"""line1
+    in2de = ("""\
+line1
 line2
 // tag: BEGIN
 // tag: END
 """)
-    out2de = (
-"""line1
+    out2de = ("""\
+line1
 line2
 ____content____
 """)
-    nested_in2db = (
-"""#ifndef BLA
+    nested_in2db = ("""\
+#ifndef BLA
 #define BLA
 // tag: BEGIN
 // tag: END
@@ -362,8 +366,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_out2db = (
-"""#ifndef BLA
+    nested_out2db = ("""\
+#ifndef BLA
 #define BLA
 ____content____
 #   ifndef FOO
@@ -374,8 +378,8 @@ ____content____
 #   endif
 #endif // !BLA
 """)
-    nested_in2de = (
-"""#ifndef BLA
+    nested_in2de = ("""\
+#ifndef BLA
 #define BLA
 #   ifndef FOO
 #       ifdef BAR
@@ -400,3 +404,9 @@ ____content____
 #endif // !BLA
 """)
 
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+if __name__ == '__main__':
+    ut.main()

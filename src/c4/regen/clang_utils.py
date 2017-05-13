@@ -26,7 +26,7 @@ idx = None
 
 def load_clang(libdir=None, version=clang_version):
     def _dbg(*args, **kwargs): dbg("loading clang:", *args, **kwargs)
-    _dbg("libdir=", libdir, "version=", version, "fallback=", fallbacks)
+    _dbg("libdir=", libdir, "version=", version)
     _dbg("LD_LIBRARY_PATH=", os.environ["LD_LIBRARY_PATH"])
     _dbg("PATH=", os.environ["PATH"])
     if libdir is None:
@@ -35,7 +35,7 @@ def load_clang(libdir=None, version=clang_version):
         if exe is None:
             msg = "could not find a suitable llvm-config executable. Searched version {}"
             raise Exception(msg.format(version))
-        libdir = subprocess.getoutput(llvm_config_executable + " --libdir")
+        libdir = subprocess.getoutput(exe + " --libdir")
         _dbg("libdir=", libdir)
     if libdir is not None:
         clang.cindex.Config.set_library_path(libdir)  # this doesn't work, at least in Ubuntu 16.04 x64
