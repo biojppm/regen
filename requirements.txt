@@ -1,3 +1,4 @@
-libclang-py3
+libclang-py3 == 3.8
 jinja2
-asciitree
+asciitree >= 0.2
+ccsyspath

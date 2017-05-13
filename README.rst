@@ -104,7 +104,6 @@ and also `myenum.gen.cpp`:
             { FOO, "FOO"},
             { BAR, "BAR"},
             { BAZ, "BAZ"},
-            { BOD, "BOD"},
         };
         EnumPairs< MyEnum > r(vals);
         return r;
@@ -114,14 +113,17 @@ and also `myenum.gen.cpp`:
 Running
 -------
 
+Finding libclang
+^^^^^^^^^^^^^^^^
 `regen` uses `libclang-py3 <https://pypi.python.org/pypi/libclang-py3>`_,
 which is a python wrapper for the libclang library. The current version of
-libclang-py3 requires libclang 3.9. You may need to alter ``LD_LIBRARY_PATH``
-so that libclang can be found. For example::
+libclang-py3 requires libclang 3.8. regen tries to find libclang 3.8 by
+querying ``llvm-config --libdir`` (if ``llvm-config --version`` reports 3.8)
+or ``llvm-config-3.8 --libdir`` if the first fails. If this also fails, then
+you can still use the option ``--clang-libdir``.
 
-    LD_LIBRARY_PATH=$(llvm-config-3.9 --libdir) python regen.py myenum.h
-
-(This version dependency needs to be fixed).
+(This version dependency needs to be fixed; this will probably be done by
+using different branches).
 
 
 Installing
