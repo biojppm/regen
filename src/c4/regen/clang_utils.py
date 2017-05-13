@@ -8,51 +8,71 @@ import tempfile
 import ccsyspath
 from shutil import which
 
-version_default = "3.8"
-version_fallback = ["4.0", "3.9", "3.8", "3.7", "3.6", "3.5"]
-default_options = TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD|TranslationUnit.PARSE_SKIP_FUNCTION_BODIES#|TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
-inc_path = ["-I{}".format(str(i,'utf-8')) for i in ccsyspath.system_include_paths('clang++')]
 from .util import dbg
 
+clang_version = "3.8"
+default_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+                   | TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
+                   # | TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
+                   )
+inc_path = ["-I{}".format(str(i,'utf-8'))
+            for i in ccsyspath.system_include_paths('clang++')]
 idx = None
 
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
 
-def load_clang(libdir=None, version=version_default, fallbacks=version_fallback):
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
+
+def load_clang(libdir=None, version=clang_version):
+    def _dbg(*args, **kwargs): dbg("loading clang:", *args, **kwargs)
+    _dbg("libdir=", libdir, "version=", version, "fallback=", fallbacks)
+    _dbg("LD_LIBRARY_PATH=", os.environ["LD_LIBRARY_PATH"])
+    _dbg("PATH=", os.environ["PATH"])
     if libdir is None:
-        exe = find_llvm_config(version, fallbacks)
+        exe = find_llvm_config(version)
+        _dbg("llvm-config=", exe)
         if exe is None:
-            raise Exception("could not find a suitable llvm-config executable. searched {} and {}".format(version, fallbacks))
-        libdir = find_clang_libdir(exe)
-    clang.cindex.Config.set_library_path(libdir) # this doesn't work, at least in Ubuntu 16.04 x64
-    libname = "libclang.so" # FIXME for windows
-    clang.cindex.Config.set_library_file(os.path.join(libdir, libname))
+            msg = "could not find a suitable llvm-config executable. Searched version {}"
+            raise Exception(msg.format(version))
+        libdir = subprocess.getoutput(llvm_config_executable + " --libdir")
+        _dbg("libdir=", libdir)
+    if libdir is not None:
+        clang.cindex.Config.set_library_path(libdir)  # this doesn't work, at least in Ubuntu 16.04 x64
+        libname = "libclang.so"  # FIXME for windows
+        lib = os.path.join(libdir, libname)
+        _dbg("lib=", lib)
+        assert os.path.exists(lib)
+        clang.cindex.Config.set_library_file(lib)
 
 
-def find_llvm_config(version=version_default, fallback=version_fallback):
-    from shutil import which
-    if version is None:
-        exe = which("llvm-config")
-        if exe is not None:
-            return exe
-    if isinstance(fallback, str): fallback = fallback.split(",")
-    exe = which("llvm-config-" + version)
+def find_llvm_config(version=clang_version):
+    def _dbg(*args, **kwargs): dbg("looking for llvm-config:", *args, **kwargs)
+    _dbg("version", version)
+    exe = which("llvm-config")
+    _dbg("'llvm-config' in path?")
     if exe is None:
-        for v in fallback:
-            exe = which("llvm-config-" + v)
-            if exe is not None:
-                break
+        _dbg("'llvm-config' not found")
+    else:
+        _dbg("'llvm-config' found:", exe)
+        llvmc_version = subprocess.getoutput(exe + " --version")
+        _dbg("'llvm-config' version:", llvmc_version)
+        majmin = ".".join(llvmc_version.split(".")[0:2])
+        ref = ".".join(version.split(".")[0:2])
+        if majmin == ref:
+            _dbg("'llvm-config' version ok")
+            return exe
+        else:
+            _dbg("'llvm-config' version not ok")
+            exe = None
+    ver = "llvm-config-" + version
+    _dbg(ver, "in path?")
+    exe = which(ver)
+    if exe is not None:
+        _dbg("found", ver, ":", exe)
+    else:
+        _dbg("not found", ver, ":", exe)
     return exe
-
-
-def find_clang_libdir(llvm_config_executable):
-    libdir = subprocess.getoutput(llvm_config_executable + " --libdir")
-    return libdir
 
 
 # ------------------------------------------------------------------------------

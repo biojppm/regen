@@ -781,10 +781,10 @@ def handle_args(in_args=None, clang_version = None):
     parser.add_option_group(cmds)
     #
     clo = OptionGroup(parser, "clang options")
-    clo.add_option("--clang-version", default=clang_version if clang_version else clu.version_default,
-                    help="specify a clang version number for finding the clang library. [default: %default]")
-    clo.add_option("--clang-version-fallback", default=",".join(clu.version_fallback),
-                    help="specify a sequence of comma-separated version numbers to fall back on if libclang is not found in the original clang-version. [default: %default]")
+    #clo.add_option("--clang-version", default=clang_version if clang_version else clu.version_default,
+    #                help="specify a clang version number for finding the clang library. [default: %default]")
+    #clo.add_option("--clang-version-fallback", default=",".join(clu.version_fallback),
+    #                help="specify a sequence of comma-separated version numbers to fall back on if libclang is not found in the original clang-version. [default: %default]")
     clo.add_option("--clang-libdir", default=None,
                     help="directly specify the directory where libclang is located. This will bypass the clang-version lookup. [default: %default]")
     parser.add_option_group(clo)
