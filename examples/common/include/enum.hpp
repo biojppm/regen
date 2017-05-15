@@ -5,7 +5,9 @@
 #include <cstring>
 
 //-----------------------------------------------------------------------------
-/** a container for all enum value-name pairs */
+/** A simple (proxy) container for the value-name pairs of an enum type.
+ * Uses linear search for finds; this could be improved for time-critical
+ * code. */
 template< class T >
 class EnumSymbols
 {
@@ -46,13 +48,18 @@ private:
 };
 
 //-----------------------------------------------------------------------------
-/** SPECIALIZE! This needs to be specialized for each enum type.
+/** return an EnumSymbols object for the enum type T
+ *
+ * @warning SPECIALIZE! This needs to be specialized for each enum type.
  * Failure to provide a specialization will cause a linker error. */
 template< class T >
 EnumSymbols< T > const esyms();
+
 /** return the offset at which the enum symbol starts. For example,
  * eoffs< MyEnumClass >() would be 13=strlen("MyEnumClass::")
- * SPECIALIZE! This needs to be specialized for each C++11 enum class type. */
+ *
+ * @warning SPECIALIZE! This needs to be specialized for each C++11 enum
+ * class type. */
 template< class T >
 size_t eoffs()
 {
@@ -68,6 +75,7 @@ T str2e(const char* str)
     auto *p = pairs.get(str);
     return p->value;
 }
+
 /** get the c-string corresponding to an enum value */
 template< class T >
 const char* e2str(T e)
@@ -76,8 +84,8 @@ const char* e2str(T e)
     auto *p = es.get(e);
     return p->name;
 }
-/** get the c-string corresponding to an enum value,
- * skipping the type for C++11 enum classes. */
+
+/** like e2str(), but skip the type for C++11 enum classes. */
 template< class T >
 const char* e2stroffs(T e)
 {
@@ -128,6 +136,7 @@ bool EnumSymbols< T >::Sym::cmp(const char *s) const
 
     return false;
 }
+
 template< class T >
 bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
 {

@@ -4,17 +4,17 @@ import c4.regen as regen
 
 egen = regen.EnumGenerator(
     hdr="""
-template<> const EnumPairs< {{enum.type}} > enum_pairs();
+template<> const EnumSymbols< {{enum.type}} > esyms();
 """,
     src="""
-template<> const EnumPairs< {{enum.type}} > enum_pairs()
+template<> const EnumSymbols< {{enum.type}} > esyms()
 {
-    static const EnumAndName< {{enum.type}} > vals[] = {
+    static const EnumSymbols< {{enum.type}} >::Sym vals[] = {
         {% for e in enum.symbols %}
         { {{e.name}}, "{{e.name}}"},
         {% endfor %}
     };
-    EnumPairs< {{enum.type}} > r(vals);
+    EnumSymbols< {{enum.type}} > r(vals);
     return r;
 }
 """

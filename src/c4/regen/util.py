@@ -1,10 +1,15 @@
+import sys
 
 debug_mode = True
 
 
+def logerr(*args, **kwargs):
+    print(*args, **kwargs, file=sys.stderr)
+
+
 def dbg(*args, **kwargs):
     if debug_mode:
-        print(*args, **kwargs)
+        print(*args, **kwargs, file=sys.stderr)
 
 
 def cacheattr(obj, name, function):

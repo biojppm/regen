@@ -191,7 +191,6 @@ class Member(Var):
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
 class Prop(Member):
 
     def __init__(self, annotation_cursor):
@@ -217,10 +216,10 @@ class Prop(Member):
         if self.class_obj == None:
             raise Exception(str(self) + ": could not find class!!!")
 
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 class Class(CodeEntity):
 
     def __init__(self, annotation_cursor):
@@ -319,12 +318,12 @@ class Enum(CodeEntity):
         self.is_class = clu.is_enum_class(self.enum_cursor)
         self.class_name = self.enum_cursor.displayname if self.is_class else ""
         #
-        # is this enum contained within another class?
-        super_class = clu.find_enclosing_class_node(macro_cursor)
-        if super_class.kind == ck.INVALID_FILE:
-            super_class = None
-        self.super_class_cursor = super_class
-        self.super_class_name = super_class.displayname if super_class is not None else ""
+        # is this enum nested in a class?
+        enclosing_class = clu.find_enclosing_class_node(macro_cursor)
+        if enclosing_class is not None and enclosing_class.kind == ck.INVALID_FILE:
+            enclosing_class = None
+        self.enclosing_class_cursor = enclosing_class
+        self.enclosing_class_name = enclosing_class.displayname if enclosing_class is not None else ""
         #
         # load the symbols
         self.symbols = []
@@ -337,23 +336,23 @@ class Enum(CodeEntity):
         if hasattr(self, '_ctx'):
             return self._ctx
         cn = self.class_name + "::" if self.class_name else ""
-        scn = (self.super_class_name + "::") if self.super_class_name else ""
-        ename = scn + self.enum_name
+        enccn = (self.enclosing_class_name + "::") if self.enclosing_class_name else ""
+        ename = enccn + self.enum_name
         self._ctx = {
             'enum':{
                 'type': ename,
-                'underlying_type':self.underlying_type,
-                'comment':self.comment,
+                'underlying_type': self.underlying_type,
+                'comment': self.comment,
                 'is_class': self.is_class,
-                'superclass': scn,
-                'superclass_len': len(scn),
+                'enclosing_class': enccn,
+                'enclosing_class_len': len(enccn),
                 'ast_node': self.enum_cursor,
                 'symbols': [
                     {
-                        'name':cn+s.name,
-                        'value':s.value,
-                        'comment':s.comment,
-                        'ast_node':s.ast_node,
+                        'name': cn + s.name,
+                        'value': s.value,
+                        'comment': s.comment,
+                        'ast_node': s.ast_node,
                     } for s in self.symbols
                 ]
             }
@@ -361,7 +360,7 @@ class Enum(CodeEntity):
         return self._ctx
 
     def __str__(self):
-        sc = self.super_class_cursor
+        sc = self.enclosing_class_cursor
         e = self.enum_cursor
         s = clu.fileline(self.macro.cursor) + ": C4_ENUM: "
         if sc: s += (sc.displayname or sc.spelling)+"::"
@@ -559,15 +558,41 @@ class EnumGenerator(BaseGenerator):
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 
+
+class ChunkWriterStdOut:
+    """
+    Write the generated source code chunks into stdout.
+    """
+    name = 'stdout'
+
+    def write(self, source_file, chunk_iterable, mark=None):
+        hdr, inl, src = CodeChunk.join(chunk_iterable)
+        print(hdr)
+        print()
+        print(inl)
+        print()
+        print(src)
+
+    def outfiles(self, source_file):
+        """
+        get the list of files output by this writer
+        :param source_file: the source file
+        :return: the list of files
+        """
+        return None
+
+
 class ChunkWriterSameFile:
     """
     Write the generated source code chunks into the exact same source file
     where they are originated from.
     """
+    name = 'same_file'
+
     def write(self, source_file, chunk_iterable, mark=None):
         cl = __class__
         mark = mark if mark is not None else cl.mark
-        hdr,inl,src = CodeChunk.join(chunk_iterable)
+        hdr, inl, src = CodeChunk.join(chunk_iterable)
         pump_to_file(source_file.filename, hdr+inl+src, mark, cl.begin, cl.end)
 
     def outfiles(self, source_file):
@@ -585,8 +610,10 @@ class ChunkWriterSameFile:
 
 class ChunkWriterGenFile:
     """
-    write the source code chunks into newly generated source files
+    Write the generated source code chunks into newly generated source files
     """
+    name = 'gen_file'
+
     def __init__(self, tpl_hdr=None, tpl_src=None, tpl_inl=None):
         self.tpl_hdr = tpl_hdr if tpl_hdr is not None else ChunkWriterGenFile.tpl_hdr
         self.tpl_src = tpl_src if tpl_src is not None else ChunkWriterGenFile.tpl_src
@@ -595,7 +622,7 @@ class ChunkWriterGenFile:
 
     def write(self, source_file, chunk_iterable):
         c = __class__
-        hdr,inl,src = CodeChunk.join(chunk_iterable, inline_in_header=self.inl_to_hdr)
+        hdr, inl, src = CodeChunk.join(chunk_iterable, inline_in_header=self.inl_to_hdr)
         ctx = {
             'notice': c.notice,
             'hdr': hdr,
@@ -649,13 +676,30 @@ class ChunkWriterGenFile:
     tpl_inl = ""
 
 
+writers = [
+    ChunkWriterSameFile,
+    ChunkWriterGenFile,
+    ChunkWriterStdOut
+]
+
+
+def resolve_writer(name):
+    for w in writers:
+        if w.name == name:
+            return w
+    msg = "{}: writer not found. Choose one of {}"
+    msg = msg.format(name, ",".join(cl.name for cl in writers))
+    raise Exception(msg)
+    return None
+
+
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
 class SourceFile:
 
-    def __init__(self, filename = None):
+    def __init__(self, filename=None):
         assert filename is not None and filename != ""
         self.filename = filename
         #
@@ -726,34 +770,44 @@ def run(writer, enum_generator=None, class_generators=None, in_args=None, clang_
     source_files = []
     for a in args:
         sf = SourceFile(a)
-        sf.parse(opts.args)
+        sf.parse(opts.clang_args)
         source_files.append(sf)
     #
+    if opts.writer:
+        writer = resolve_writer(opts.writer)()
+    if opts.show_writer_types:
+        fieldlen = 0
+        for w in writers:
+            fieldlen = max(fieldlen, len(w.name))
+        fieldlen += 4
+        for w in writers:
+            print(("{:"+str(fieldlen)+"} {}").format(w.name, w.__doc__))
+
     if opts.gen_code:
         for f in source_files:
             f.extract()
             f.gen_code(writer, enum_generator, class_generators)
-    elif opts.show_out_all or opts.show_out_hdr or opts.show_out_src:
-        if opts.show_out_hdr and opts.show_out_src:
-            opts.show_out_all = True
+    if opts.show_all or opts.show_hdr or opts.show_src:
+        if opts.show_hdr and opts.show_src:
+            opts.show_all = True
         outfiles = set()
         for f in source_files:
             f.extract()
             ch = f.gen_chunks(enum_generator, class_generators)
             if ch:
                 for o in writer.outfiles(f):
-                    if opts.show_out_all:
+                    if opts.show_all:
                         outfiles.add(o)
-                    elif opts.show_out_hdr and is_hdr(o):
+                    elif opts.show_hdr and is_hdr(o):
                         outfiles.add(o)
-                    elif opts.show_out_src and is_src(o):
+                    elif opts.show_src and is_src(o):
                         outfiles.add(o)
         for f in outfiles:
             print(f)
-    elif opts.show_ast:
+    if opts.show_ast:
         for f in source_files:
             f.print_ast()
-    elif opts.show_includes:
+    if opts.show_includes:
         for f in source_files:
             f.print_includes()
 
@@ -770,21 +824,29 @@ def handle_args(in_args=None, clang_version=None):
     cmds = OptionGroup(parser, "Available commands")
     cmds.add_option("--gen-code", action="store_true", default=False,
                     help="generate source code (this is the default)")
-    cmds.add_option("--show-out-hdr", action="store_true", default=False,
+    cmds.add_option("--show-hdr", action="store_true", default=False,
                     help="show header files to be generated or changed")
-    cmds.add_option("--show-out-src", action="store_true", default=False,
+    cmds.add_option("--show-src", action="store_true", default=False,
                     help="show source files to be generated or changed")
-    cmds.add_option("--show-out-all", action="store_true", default=False,
+    cmds.add_option("--show-all", action="store_true", default=False,
                     help="show header+source files to be generated or changed")
     cmds.add_option("--show-ast", action="store_true", default=False,
                     help="show the abstract syntax tree of the input file(s)")
     cmds.add_option("--show-includes", action="store_true", default=False,
-                    help="only show include tree of the input file(s)")
+                    help="show include tree of the input file(s)")
     parser.add_option_group(cmds)
     #
+    wargs = OptionGroup(parser, "Fine-tuning")
+    wargs.add_option("--writer", type=str, default=None,
+                     help="""Override the writer type.
+                     Available types: """ +
+                     ",".join([cl.name for cl in writers]))
+    wargs.add_option("--show-writer-types", action="store_true", default=False,
+                     help="""Show quick help on the available writer types.""")
+    #
     clo = OptionGroup(parser, "clang options")
-    clo.add_option('-a', '--args', default="",
-                   help="arguments to be passed to clang, eg '-std=c++11'")
+    clo.add_option('-a', '--clang-args', default="",
+                   help="arguments to be passed to clang, eg --clang-args='-std=c++11'")
     #clo.add_option("--clang-version", default=clang_version if clang_version else clu.version_default,
     #                help="specify a clang version number for finding the clang library. [default: %default]")
     #clo.add_option("--clang-version-fallback", default=",".join(clu.version_fallback),
@@ -801,10 +863,10 @@ def handle_args(in_args=None, clang_version=None):
             parser.error('invalid number of arguments')
     #
     # FIXME setup mutually exclusive options
-    if opts.show_out_all or opts.show_out_hdr or opts.show_out_src or opts.show_ast or opts.show_includes:
+    if opts.show_all or opts.show_hdr or opts.show_src or opts.show_ast or opts.show_includes:
         opts.gen_code = False
     #
-    opts.args = util.splitesc_quoted(opts.args, ' ')
+    opts.clang_args = util.splitesc_quoted(opts.clang_args, ' ')
     #
     return opts, args
 

@@ -5,10 +5,10 @@
 
 #include "myenum.hpp"
 
-/** enum: auto-generated from myenum.hpp:6: C4_ENUM: MyEnum */
-template<> const EnumPairs< MyEnum > enum_pairs();
+/** enum: auto-generated from myenum.hpp:7: C4_ENUM: MyEnum */
+template<> const EnumSymbols< MyEnum > esyms();
 /** enum: auto-generated from myenum.hpp:14: C4_ENUM: MyEnumClass */
-template<> const EnumPairs< MyEnumClass > enum_pairs();
+template<> const EnumSymbols< MyEnumClass > esyms();
 
 
 

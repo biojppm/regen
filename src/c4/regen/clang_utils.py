@@ -9,7 +9,7 @@ import ccsyspath
 from shutil import which
 import sys
 
-from .util import dbg, cacheattr
+from .util import logerr, dbg, cacheattr
 
 clang_version = "3.8"
 clang_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
@@ -114,9 +114,11 @@ def parse_file(filename, args=[], options=clang_options):
     idx = cacheattr(sys.modules[__name__], 'clang_idx',
                     lambda: clang.cindex.Index.create())
     try:
+        if not os.path.exists(filename):
+            raise Exception("file not found: " + filename)
         tu = idx.parse(path=filename, args=args + ip, options=options)
         if tu.diagnostics:
-            print(_e(tu.diagnostics))
+            logerr(_e(tu.diagnostics))
     except:
         if tu:
             raise Exception(_e(tu.diagnostics))
