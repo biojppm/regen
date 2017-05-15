@@ -8,3 +8,6 @@ regen.egg-info/
 /build/
 /dist/
 .idea
+
+build
+install
