@@ -1,6 +1,6 @@
 import sys
 
-debug_mode = True
+debug_mode = False
 
 
 def logerr(*args, **kwargs):

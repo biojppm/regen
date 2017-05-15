@@ -7,7 +7,7 @@ template< class T, class I >
 size_t bits2str(I bits, char *str, size_t sz)
 {
     size_t pos = 0;
-    for(auto const& p : enum_pairs< T >())
+    for(auto const& p : esyms< T >())
     {
         I b(p.value);
         if((b != 0) && ((bits & b) == b))
@@ -39,7 +39,7 @@ template< class T, class I >
 size_t bits2str_size(I bits)
 {
     size_t pos = 0;
-    for(auto const& p : enum_pairs< T >())
+    for(auto const& p : esyms< T >())
     {
         I b(p.value);
         if((b != 0) && ((bits & b) == b))
@@ -57,7 +57,7 @@ template< class T, class Stream, class I >
 Stream& bits2stream(I bits, Stream &s)
 {
     bool written = false;
-    for(auto const& p : enum_pairs< T >())
+    for(auto const& p : esyms< T >())
     {
         I b(p.value);
         if((b != 0) && ((bits & b) == b))
@@ -79,7 +79,7 @@ template< class T, class I >
 I str2bits(const char *str, size_t sz)
 {
     I val = 0;
-    auto pairs = enum_pairs< T >();
+    auto pairs = esyms< T >();
     bool started = false;
     bool alnum = false, num = false;
     const char *f = nullptr;

@@ -1,11 +1,11 @@
 from . import clang_utils as clu
 from clang.cindex import TokenKind as tkk, CursorKind as ck
-from collections import OrderedDict as odict
 import jinja2 as jj2
 import re
 import os.path
 
 from . import util
+from .util import dbg
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
@@ -428,11 +428,10 @@ class TplInfo:
             s += str(p)
         self.params_string = s
 
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
-# -----------------------------------------------------------------------------
 
-
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 class TplParam:
 
     def __init__(self, cursor):
@@ -456,7 +455,6 @@ class TplParam:
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
 class CodeChunk:
     """
     represents a chunk of auto-generated C/C++ source code, separated into
@@ -508,7 +506,6 @@ class CodeChunk:
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------
-
 class BaseGenerator:
 
     def __init__(self, **kwargs):
@@ -527,7 +524,6 @@ class BaseGenerator:
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
-
 class ClassGenerator(BaseGenerator):
 
     def __init__(self, **kwargs):
@@ -542,7 +538,6 @@ class ClassGenerator(BaseGenerator):
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-
 class EnumGenerator(BaseGenerator):
 
     def __init__(self, **kwargs):
@@ -557,8 +552,6 @@ class EnumGenerator(BaseGenerator):
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
 # -----------------------------------------------------------------------------
-
-
 class ChunkWriterStdOut:
     """
     Write the generated source code chunks into stdout.
@@ -582,6 +575,7 @@ class ChunkWriterStdOut:
         return None
 
 
+# -----------------------------------------------------------------------------
 class ChunkWriterSameFile:
     """
     Write the generated source code chunks into the exact same source file
@@ -608,6 +602,7 @@ class ChunkWriterSameFile:
     end = mark + ":(END). DO NOT EDIT THE BLOCK ABOVE. WILL BE OVERWRITTEN!\n"
 
 
+# -----------------------------------------------------------------------------
 class ChunkWriterGenFile:
     """
     Write the generated source code chunks into newly generated source files
@@ -787,6 +782,7 @@ def run(writer, enum_generator=None, class_generators=None, in_args=None, clang_
         for f in source_files:
             f.extract()
             f.gen_code(writer, enum_generator, class_generators)
+
     if opts.show_all or opts.show_hdr or opts.show_src:
         if opts.show_hdr and opts.show_src:
             opts.show_all = True
@@ -795,7 +791,8 @@ def run(writer, enum_generator=None, class_generators=None, in_args=None, clang_
             f.extract()
             ch = f.gen_chunks(enum_generator, class_generators)
             if ch:
-                for o in writer.outfiles(f):
+                of = writer.outfiles(f)
+                for o in of:
                     if opts.show_all:
                         outfiles.add(o)
                     elif opts.show_hdr and is_hdr(o):
@@ -804,9 +801,11 @@ def run(writer, enum_generator=None, class_generators=None, in_args=None, clang_
                         outfiles.add(o)
         for f in outfiles:
             print(f)
+
     if opts.show_ast:
         for f in source_files:
             f.print_ast()
+
     if opts.show_includes:
         for f in source_files:
             f.print_includes()
