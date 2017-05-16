@@ -3,16 +3,18 @@
 
 #include <cinttypes>
 #include <cstring>
+#include <type_traits>
 
 #include "enum.hpp"
 
 //-----------------------------------------------------------------------------
 /** write a bitmask to a stream, formatted as a string */
-template< class T, class Stream, class I >
-Stream& bm2stream(I bits, Stream &s)
+template< class E, class Stream >
+Stream& bm2stream(typename std::underlying_type<E>::type bits, Stream &s)
 {
+    using I = typename std::underlying_type<E>::type;
     bool written = false;
-    for(auto const& p : esyms< T >())
+    for(auto const& p : esyms< E >())
     {
         I b(p.value);
         if((b != 0) && ((bits & b) == b))
@@ -32,25 +34,22 @@ Stream& bm2stream(I bits, Stream &s)
 //-----------------------------------------------------------------------------
 /** convert a bitmask to string.
  * return the number of characters written. To find the needed size,
- * call first with str=nullptr or with sz=0 */
-template< class T, class I >
-size_t bm2str(I bits, char *str = nullptr, size_t sz = 0)
+ * call first with str=nullptr and sz=0 */
+template< class E >
+size_t bm2str(typename std::underlying_type<E>::type bits, char *str = nullptr, size_t sz = 0)
 {
+    using I = typename std::underlying_type<E>::type;
+    C4_ASSERT((str == nullptr) == (sz == 0));
+
 // this macro simplifies the code
-#define _c4appendchars(pushcode, num)           \
-    if(str && (pos + num <= sz))                \
-    {                                           \
-        pushcode;                               \
-    }                                           \
-    else if(str && sz)                          \
-    {                                           \
-        C4_ERROR("cannot write to string pos=%d num=%d sz=%d", (int)pos, (int)num, (int)sz);     \
-    }                                           \
+#define _c4appendchars(code, num)               \
+    if(str && (pos + num <= sz)) { code; }      \
+    else if(str && sz) { C4_ERROR("cannot write to string pos=%d num=%d sz=%d", (int)pos, (int)num, (int)sz); } \
     pos += num
 
     size_t pos = 0;
-    typename EnumSymbols< T >::Sym const* zero = nullptr;
-    for(auto const& p : esyms< T >())
+    typename EnumSymbols< E >::Sym const* zero = nullptr;
+    for(auto const& p : esyms< E >())
     {
         I b = static_cast< I >(p.value);
         if(b == 0)
@@ -106,11 +105,13 @@ template<> struct scanftag<  int64_t > { static constexpr const char *tag = "%" 
 } // end namespace detail
 
 /** convert a string to a bitmask */
-template< class T, class I >
-I str2bm(const char *str, size_t sz)
+template< class E >
+typename std::underlying_type<E>::type str2bm(const char *str, size_t sz)
 {
+    using I = typename std::underlying_type<E>::type;
+
     I val = 0;
-    auto pairs = esyms< T >();
+    auto pairs = esyms< E >();
     bool started = false;
     bool alnum = false, num = false;
     const char *f = nullptr;
@@ -172,10 +173,10 @@ I str2bm(const char *str, size_t sz)
 }
 
 /** convert a string to a bitmask */
-template< class T, class I >
-I str2bm(const char *str)
+template< class E >
+typename std::underlying_type<E>::type str2bm(const char *str)
 {
-    return str2bm<T,I>(str, strlen(str));
+    return str2bm<E>(str, strlen(str));
 }
 
 #endif // _C4_BITMASK_HPP_

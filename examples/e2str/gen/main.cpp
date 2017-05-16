@@ -67,27 +67,27 @@ void test_bm2str()
             {
                 if(!str.empty()) str += '|';
                 str += syms[i].name;
-                val |= (I)syms[i].value;
+                val |= static_cast< I >(syms[i].value);
                 //printf("%d", i);
             }
-            //len = bm2str< E, I >(val); // needed length
+            //len = bm2str< E >(val); // needed length
             //ws.resize(len);
-            //bm2str< E, I >(val, &ws[0], len);
+            //bm2str< E >(val, &ws[0], len);
             //printf(": %s (%zu) %s\n", str.c_str(), (uint64_t)val, ws.data());
 
-            res = str2bm< E, I >(str.data());
+            res = str2bm< E >(str.data());
             EXPECT_EQ(res, val);
 
-            len = bm2str< E, I >(res); // needed length
+            len = bm2str< E >(res); // needed length
             ws.resize(len);
-            bm2str< E, I >(val, &ws[0], len);
-            res = str2bm< E, I >(ws.data());
+            bm2str< E >(val, &ws[0], len);
+            res = str2bm< E >(ws.data());
             EXPECT_EQ(res, val);
 
             // write a string with the bitmask as an int
             int ret = snprintf(&ws[0], ws.size(), "%" PRId64, (int64_t)val);
             C4_CHECK((size_t)ret < ws.size());
-            res = str2bm< E, I >(str.data());
+            res = str2bm< E >(str.data());
             EXPECT_EQ(res, val);
 
             bool carry = true;
