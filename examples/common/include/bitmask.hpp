@@ -47,16 +47,35 @@ size_t bm2str
     using I = typename std::underlying_type<E>::type;
     C4_ASSERT((str == nullptr) == (sz == 0));
 
-// this macro simplifies the code
-#define _c4appendchars(code, num)               \
-    if(str && (pos + num <= sz)) { code; }      \
+/** this macro simplifies the code
+ * @todo improve this by writing from the end and moving only once. */
+#define _c4prependchars(code, num)                                      \
+    if(str && (pos + num <= sz))                                        \
+    {                                                                   \
+        /* move the current string to the right */                      \
+        memmove(str + num, str, pos);                                   \
+        /* now write in the beginning of the string */                  \
+        code;                                                           \
+    }                                                                   \
+    else if(str && sz) { C4_ERROR("cannot write to string pos=%d num=%d sz=%d", (int)pos, (int)num, (int)sz); } \
+    pos += num
+#define _c4appendchars(code, num)                                       \
+    if(str && (pos + num <= sz))                                        \
+    {                                                                   \
+        code;                                                           \
+    }                                                                   \
     else if(str && sz) { C4_ERROR("cannot write to string pos=%d num=%d sz=%d", (int)pos, (int)num, (int)sz); } \
     pos += num
 
+    auto syms = esyms< E >();
+
     size_t pos = 0;
     typename EnumSymbols< E >::Sym const* zero = nullptr;
-    for(auto const& p : esyms< E >())
+    // do reverse iteration to give preference to composite enum symbols,
+    // which are likely to appear later in the enum sequence
+    for(size_t i = syms.size() - 1; i != size_t(-1); --i)
     {
+        auto const p = syms[i];
         I b = static_cast< I >(p.value);
         if(b == 0)
         {
@@ -68,26 +87,27 @@ size_t bm2str
             // append bit-or character
             if(pos > 0)
             {
-                _c4appendchars(str[pos] = '|', 1);
+                _c4prependchars(*str = '|', 1);
             }
             // append bit string
             const char *pname = p.name_offs(offst);
             size_t len = strlen(pname);
-            _c4appendchars(strncpy(str+pos, pname, len), len);
+            _c4prependchars(strncpy(str, pname, len), len);
         }
     }
-    C4_ASSERT(bits == 0);
+
+    C4_CHECK_MSG(bits == 0, "could not find all bits");
     if(pos == 0) // make sure at least something is written
     {
         if(zero) // if we have a zero symbol, use that
         {
             const char *pname = zero->name_offs(offst);
             size_t len = strlen(pname);
-            _c4appendchars(strncpy(str+pos, pname, len), len);
+            _c4prependchars(strncpy(str, pname, len), len);
         }
         else // otherwise just write an integer zero
         {
-            _c4appendchars(str[pos] = '0', 1);
+            _c4prependchars(*str = '0', 1);
         }
     }
     _c4appendchars(str[pos] = '\0', 1);
@@ -96,6 +116,7 @@ size_t bm2str
 
 // cleanup!
 #undef _c4appendchars
+#undef _c4prependchars
 }
 
 
