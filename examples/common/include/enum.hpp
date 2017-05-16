@@ -3,6 +3,8 @@
 
 #include "util.hpp"
 #include <cstring>
+#include <iterator>
+
 
 //-----------------------------------------------------------------------------
 /** A simple (proxy) container for the value-name pairs of an enum type.
@@ -22,15 +24,15 @@ public:
         bool cmp(const char *s, size_t len) const;
     };
 
+    using const_iterator = Sym const*;
+    using const_reverse_iterator = std::reverse_iterator< Sym const* >;
+
 public:
 
     template< size_t N >
     EnumSymbols(Sym const (&p)[N]) : m_symbols(p), m_num(N) {}
 
     size_t size() const { return m_num; }
-
-    Sym const* begin() const { return m_symbols; }
-    Sym const* end  () const { return m_symbols + size(); }
 
     Sym const* get(T v) const { auto p = find(v); C4_CHECK_MSG(p != nullptr, "could not find symbol=%zd", (std::ptrdiff_t)v); return p; }
     Sym const* get(const char *s) const { auto p = find(s); C4_CHECK_MSG(p != nullptr, "could not find symbol \"%s\"", s); return p; }
@@ -41,6 +43,12 @@ public:
     Sym const* find(const char *s, size_t len) const;
 
     Sym const& operator[] (size_t i) { C4_CHECK(i < m_num); return m_symbols[i]; }
+
+    Sym const* begin() const { return m_symbols; }
+    Sym const* end  () const { return m_symbols + m_num; }
+
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(m_symbols + m_num); }
+    const_reverse_iterator rend  () const { return const_reverse_iterator(m_symbols); }
 
 private:
 
