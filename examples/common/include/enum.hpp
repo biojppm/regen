@@ -7,8 +7,9 @@
 
 typedef enum : uint8_t {
     EOFFS_NONE = 0,
-    EOFFS_SYM = 1,
-    EOFFS_PFX = 2,
+    EOFFS_CLS = 1,   //< @see eoffs_cls()
+    EOFFS_PFX = 2,   //< @see eoffs_pfx()
+    _EOFFS_LAST      //< reserved
 } EnumOffsetType;
 
 //-----------------------------------------------------------------------------
@@ -72,27 +73,36 @@ private:
 template< class T >
 EnumSymbols< T > const esyms();
 
-/** return the offset at which the enum symbol starts. For example,
- * eoffs_sym< MyEnumClass >() would be 13=strlen("MyEnumClass::")
+
+/** return the offset for an enum symbol class. For example,
+ * eoffs_cls< MyEnumClass >() would be 13=strlen("MyEnumClass::").
  *
- * @warning SPECIALIZE! This needs to be specialized for each enum
- * class type that wants to use this. */
+ * With this function you can announce that the full prefix (including an
+ * eventual enclosing class or C++11 enum class plus the string prefix) is of
+ * a certain length.
+ *
+ * @warning Needs to be specialized for each enum class type that wants to
+ * use this. When no specialization is given, will return 0. */
 template< class T >
-size_t eoffs_sym()
+size_t eoffs_cls()
 {
     return 0;
 }
 
-/** return the offset for an enum symbol prefix. This includes eoffs_sym().
- * For example, eoffs< MyEnumClass >() would be 13=strlen("MyEnumClass::")
+
+/** return the offset for an enum symbol prefix. This includes eoffs_cls().
+ * With this function you can announce that the full prefix (including an
+ * eventual enclosing class or C++11 enum class plus the string prefix) is of
+ * a certain length.
  *
- * @warning SPECIALIZE! This needs to be specialized for each enum
- * class type that wants to use this. */
+ * @warning Needs to be specialized for each enum class type that wants to
+ * use this. When no specialization is given, will return 0. */
 template< class T >
 size_t eoffs_pfx()
 {
     return 0;
 }
+
 
 template< class T >
 size_t eoffs(EnumOffsetType which)
@@ -101,8 +111,8 @@ size_t eoffs(EnumOffsetType which)
     {
     case EOFFS_NONE:
         return 0;
-    case EOFFS_SYM:
-        return eoffs_sym< T >();
+    case EOFFS_CLS:
+        return eoffs_cls< T >();
     case EOFFS_PFX:
         return eoffs_pfx< T >();
     default:
@@ -110,6 +120,8 @@ size_t eoffs(EnumOffsetType which)
         return 0;
     }
 }
+
+
 //-----------------------------------------------------------------------------
 /** get the enum value corresponding to a c-string */
 template< class T >
@@ -173,10 +185,13 @@ bool EnumSymbols< T >::Sym::cmp(const char *s) const
     if(strcmp(name, s) == 0)
         return true;
 
-    auto o = eoffs< T >();
-    if(o > 0)
-        if(strncmp(name + o, s, o) == 0)
-            return true;
+    for(uint8_t i = 1; i < _EOFFS_LAST; ++i)
+    {
+        auto o = eoffs< T >((EnumOffsetType)i);
+        if(o > 0)
+            if(strncmp(name + o, s, o) == 0)
+                return true;
+    }
 
     return false;
 }
@@ -187,12 +202,15 @@ bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
     if(strncmp(name, s, len) == 0)
         return true;
 
-    auto o = eoffs< T >();
-    if(o > 0)
+    for(uint8_t i = 1; i < _EOFFS_LAST; ++i)
     {
-        auto m = len < o ? len : o;
-        if(strncmp(name + o, s, m) == 0)
-            return true;
+        auto o = eoffs< T >((EnumOffsetType)i);
+        if(o > 0)
+        {
+            auto m = len < o ? len : o;
+            if(strncmp(name + o, s, m) == 0)
+                return true;
+        }
     }
 
     return false;
