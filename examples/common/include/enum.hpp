@@ -114,7 +114,10 @@ size_t eoffs(EnumOffsetType which)
     case EOFFS_CLS:
         return eoffs_cls< T >();
     case EOFFS_PFX:
-        return eoffs_pfx< T >();
+    {
+        size_t pfx = eoffs_pfx< T >();
+        return pfx > 0 ? pfx : eoffs_cls< T >();
+    }
     default:
         C4_ERROR("unknown offset type");
         return 0;
@@ -141,11 +144,11 @@ const char* e2str(T e)
     return p->name;
 }
 
-/** like e2str(), but skip the type for C++11 enum classes. */
+/** like e2str(), but add an offset. */
 template< class T >
-const char* e2stroffs(T e)
+const char* e2stroffs(T e, EnumOffsetType ot = EOFFS_PFX)
 {
-    const char *s = e2str< T >(e) + eoffs< T >();
+    const char *s = e2str< T >(e) + eoffs< T >(ot);
     return s;
 }
 
@@ -191,7 +194,7 @@ bool EnumSymbols< T >::Sym::cmp(const char *s) const
     {
         auto o = eoffs< T >((EnumOffsetType)i);
         if(o > 0)
-            if(strncmp(name + o, s, o) == 0)
+            if(strcmp(name + o, s) == 0)
                 return true;
     }
 
@@ -204,13 +207,20 @@ bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
     if(strncmp(name, s, len) == 0)
         return true;
 
+    size_t nlen = 0;
     for(uint8_t i = 1; i < _EOFFS_LAST; ++i)
     {
         auto o = eoffs< T >((EnumOffsetType)i);
         if(o > 0)
         {
-            auto m = len < o ? len : o;
-            if(strncmp(name + o, s, m) == 0)
+            if(!nlen)
+            {
+                nlen = strlen(name);
+            }
+            C4_ASSERT(o < nlen);
+            size_t rem = nlen - o;
+            auto m = len > rem ? len : rem;
+            if(len >= m && strncmp(name + o, s, m) == 0)
                 return true;
         }
     }
@@ -222,6 +232,7 @@ bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
 template< class T >
 const char* EnumSymbols< T >::Sym::name_offs(EnumOffsetType t) const
 {
+    C4_ASSERT(eoffs< T >(t) < strlen(name));
     return name + eoffs< T >(t);
 }
 

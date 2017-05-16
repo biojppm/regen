@@ -17,11 +17,14 @@
                       << "\n";                                   \
         }                                                        \
     }
-#define EXPECT_EQ(expr1, expr2)                 \
+
+#define EXPECT_EQ(expr1, expr2)                     \
     _EXPECT_EQ((expr1), (expr2), (expr1 == expr2))
-#define EXPECT_STR_EQ(expr1, expr2)                         \
+
+#define EXPECT_STR_EQ(expr1, expr2)                             \
     _EXPECT_EQ((expr1), (expr2), (strcmp(expr1, expr2) == 0))
-#define EXPECT_BM_EQ(expr1, expr2)                         \
+
+#define EXPECT_BM_EQ(expr1, expr2)                                      \
     _EXPECT_EQ((size_t)(expr1), (size_t)(expr2), ((size_t)expr1 == (size_t)expr2))
 
 static int error_status = 0;
