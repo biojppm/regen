@@ -6,32 +6,36 @@
 
 C4_ENUM()
 typedef enum {
-  FOO = 0,
-  BAR,
-  BAZ,
+    FOO = 0,
+    BAR,
+    BAZ,
 } MyEnum;
 
 C4_ENUM()
 enum class MyEnumClass {
-  FOO = 0,
-  BAR,
-  BAZ,
+    FOO = 0,
+    BAR,
+    BAZ,
 };
 
 C4_ENUM()
 typedef enum {
-  BM_NONE = 0,
-  BM_FOO = 1 << 0,
-  BM_BAR = 1 << 1,
-  BM_BAZ = 1 << 2,
+    BM_NONE = 0,
+    BM_FOO = 1 << 0,
+    BM_BAR = 1 << 1,
+    BM_BAZ = 1 << 2,
+    BM_FOO_BAR = BM_FOO|BM_BAR,
+    BM_FOO_BAR_BAZ = BM_FOO|BM_BAR|BM_BAZ,
 } MyBitmask;
 
 C4_ENUM()
 enum class MyBitmaskClass {
-  BM_NONE = 0,
-  BM_FOO = 1 << 0,
-  BM_BAR = 1 << 1,
-  BM_BAZ = 1 << 2,
+    BM_NONE = 0,
+    BM_FOO = 1 << 0,
+    BM_BAR = 1 << 1,
+    BM_BAZ = 1 << 2,
+    BM_FOO_BAR = BM_FOO|BM_BAR,
+    BM_FOO_BAR_BAZ = BM_FOO|BM_BAR|BM_BAZ,
 };
 
 // regen:GENERATED:(BEGIN). DO NOT EDIT THE BLOCK BELOW. WILL BE OVERWRITTEN!
@@ -72,6 +76,8 @@ template<> inline const EnumSymbols< MyBitmask > esyms()
         { BM_FOO, "BM_FOO"},
         { BM_BAR, "BM_BAR"},
         { BM_BAZ, "BM_BAZ"},
+        { BM_FOO_BAR, "BM_FOO_BAR"},
+        { BM_FOO_BAR_BAZ, "BM_FOO_BAR_BAZ"},
     };
     EnumSymbols< MyBitmask > r(vals);
     return r;
@@ -82,7 +88,7 @@ template<> inline size_t eoffs_pfx< MyBitmask >()
     return 3;
 }
 
-/** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
+/** enum: auto-generated from myenum.hpp:31: C4_ENUM: MyBitmaskClass */
 template<> inline const EnumSymbols< MyBitmaskClass > esyms()
 {
     static const EnumSymbols< MyBitmaskClass >::Sym vals[] = {
@@ -90,6 +96,8 @@ template<> inline const EnumSymbols< MyBitmaskClass > esyms()
         { MyBitmaskClass::BM_FOO, "MyBitmaskClass::BM_FOO"},
         { MyBitmaskClass::BM_BAR, "MyBitmaskClass::BM_BAR"},
         { MyBitmaskClass::BM_BAZ, "MyBitmaskClass::BM_BAZ"},
+        { MyBitmaskClass::BM_FOO_BAR, "MyBitmaskClass::BM_FOO_BAR"},
+        { MyBitmaskClass::BM_FOO_BAR_BAZ, "MyBitmaskClass::BM_FOO_BAR_BAZ"},
     };
     EnumSymbols< MyBitmaskClass > r(vals);
     return r;

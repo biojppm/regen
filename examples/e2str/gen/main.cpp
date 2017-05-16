@@ -1,6 +1,6 @@
 
+#include "test_enum.cpp" // that's right.
 #include "myenum.gen.hpp"
-#include "test.cpp" // that's right.
 
 int main(int argc, const char* argv[])
 {
@@ -16,15 +16,20 @@ int main(int argc, const char* argv[])
     EXPECT_EQ(eoffs_cls< MyBitmaskClass >(), strlen("MyBitmaskClass::"));
     EXPECT_EQ(eoffs_pfx< MyBitmaskClass >(), strlen("MyBitmaskClass::BM_"));
 
-    EXPECT_EQ((int)esyms< MyEnumClass >().get("MyEnumClass::FOO")->value, (int)MyEnumClass::FOO);
-    EXPECT_EQ((int)esyms< MyEnumClass >().get("FOO")->value, (int)MyEnumClass::FOO);
+    EXPECT_BM_EQ(esyms< MyEnumClass >().get("MyEnumClass::FOO")->value, MyEnumClass::FOO);
+    EXPECT_BM_EQ(esyms< MyEnumClass >().get("FOO")->value, MyEnumClass::FOO);
 
-    EXPECT_EQ((int)esyms< MyBitmask >().get("BM_FOO")->value, (int)MyBitmask::BM_FOO);
-    EXPECT_EQ((int)esyms< MyBitmask >().get("FOO")->value, (int)MyBitmask::BM_FOO);
+    EXPECT_BM_EQ(esyms< MyBitmask >().get("BM_FOO")->value, MyBitmask::BM_FOO);
+    EXPECT_BM_EQ(esyms< MyBitmask >().get("FOO")->value, MyBitmask::BM_FOO);
+    EXPECT_BM_EQ(str2bm< MyBitmask >("BM_FOO|BM_BAR"), BM_FOO_BAR);
+    EXPECT_BM_EQ(str2bm< MyBitmask >("FOO|BAR"), BM_FOO_BAR);
 
-    EXPECT_EQ((int)esyms< MyBitmaskClass >().get("MyBitmaskClass::BM_FOO")->value, (int)MyBitmaskClass::BM_FOO);
-    EXPECT_EQ((int)esyms< MyBitmaskClass >().get("BM_FOO")->value, (int)MyBitmaskClass::BM_FOO);
-    EXPECT_EQ((int)esyms< MyBitmaskClass >().get("FOO")->value, (int)MyBitmaskClass::BM_FOO);
+    EXPECT_BM_EQ(esyms< MyBitmaskClass >().get("MyBitmaskClass::BM_FOO")->value, MyBitmaskClass::BM_FOO);
+    EXPECT_BM_EQ(esyms< MyBitmaskClass >().get("BM_FOO")->value, MyBitmaskClass::BM_FOO);
+    EXPECT_BM_EQ(esyms< MyBitmaskClass >().get("FOO")->value, MyBitmaskClass::BM_FOO);
+    EXPECT_BM_EQ(str2bm< MyBitmaskClass >("MyBitmaskClass::BM_FOO|MyBitmaskClass::BM_BAR"), MyBitmaskClass::BM_FOO_BAR);
+    EXPECT_BM_EQ(str2bm< MyBitmaskClass >("BM_FOO|BM_BAR"), MyBitmaskClass::BM_FOO_BAR);
+    EXPECT_BM_EQ(str2bm< MyBitmaskClass >("FOO|BAR"), MyBitmaskClass::BM_FOO_BAR);
 
     test_e2str< MyEnumClass >();
     test_e2str< MyEnum >();
