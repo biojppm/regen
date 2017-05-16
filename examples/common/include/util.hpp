@@ -24,8 +24,10 @@
 // error reporting
 
 #define C4_ERROR(msg, ...)                                              \
-    C4_LOG("\n%s:%d: ERROR: " msg "\nABORTING...\n", __FILE__, __LINE__, ## __VA_ARGS__); \
-    std::abort();
+    {                                                                   \
+        C4_LOG("\n%s:%d: ERROR: " msg "\nABORTING...\n", __FILE__, __LINE__, ## __VA_ARGS__); \
+        std::abort();                                                   \
+    }
 #define C4_WARNING(msg, ...) \
     C4_LOG("\n%s:%d: WARNING: " msg "\n", __FILE__, __LINE__, ## __VA_ARGS__);
 
