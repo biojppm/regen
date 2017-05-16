@@ -12,6 +12,8 @@ regen.egg-info/
 build
 install
 
+# IDE files
 .cproject
 .project
 .settings/
+CMakeLists.txt.user
