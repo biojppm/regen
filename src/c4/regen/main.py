@@ -331,12 +331,15 @@ class Enum(CodeEntity):
             if c.kind == ck.ENUM_CONSTANT_DECL:
                 self.symbols.append(EnumSymbol(c))
 
+        self.symbol_prefix = os.path.commonprefix([s.name for s in self.symbols])
+
     @property
     def ctx(self):
         if hasattr(self, '_ctx'):
             return self._ctx
         cn = self.class_name + "::" if self.class_name else ""
         enccn = (self.enclosing_class_name + "::") if self.enclosing_class_name else ""
+        print(enccn)
         ename = enccn + self.enum_name
         self._ctx = {
             'enum':{
@@ -344,8 +347,14 @@ class Enum(CodeEntity):
                 'underlying_type': self.underlying_type,
                 'comment': self.comment,
                 'is_class': self.is_class,
-                'enclosing_class': enccn,
-                'enclosing_class_len': len(enccn),
+                'class': self.class_name,
+                'class_str': cn,
+                'class_offset': len(cn),
+                'prefix': self.symbol_prefix,
+                'prefix_offset': len(cn) + len(self.symbol_prefix),
+                'enclosing_class': self.enclosing_class_name,
+                'enclosing_class_str': enccn,
+                'enclosing_class_offset': len(enccn),
                 'ast_node': self.enum_cursor,
                 'symbols': [
                     {

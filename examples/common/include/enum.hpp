@@ -150,7 +150,7 @@ const char* e2stroffs(T e)
 }
 
 //-----------------------------------------------------------------------------
-/** returns nullptr when none is found */
+/** Find a symbol by value. Returns nullptr when none is found */
 template< class T >
 typename EnumSymbols< T >::Sym const* EnumSymbols< T >::find(T v) const
 {
@@ -159,7 +159,8 @@ typename EnumSymbols< T >::Sym const* EnumSymbols< T >::find(T v) const
             return p;
     return nullptr;
 }
-/** returns nullptr when none is found */
+
+/** Find a symbol by name. Returns nullptr when none is found */
 template< class T >
 typename EnumSymbols< T >::Sym const* EnumSymbols< T >::find(const char *s) const
 {
@@ -168,7 +169,8 @@ typename EnumSymbols< T >::Sym const* EnumSymbols< T >::find(const char *s) cons
             return p;
     return nullptr;
 }
-/** returns nullptr when none is found */
+
+/** Find a symbol by name. Returns nullptr when none is found */
 template< class T >
 typename EnumSymbols< T >::Sym const* EnumSymbols< T >::find(const char *s, size_t len) const
 {

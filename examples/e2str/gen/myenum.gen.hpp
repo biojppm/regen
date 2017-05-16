@@ -7,12 +7,36 @@
 
 /** enum: auto-generated from myenum.hpp:7: C4_ENUM: MyEnum */
 template<> const EnumSymbols< MyEnum > esyms();
+
 /** enum: auto-generated from myenum.hpp:14: C4_ENUM: MyEnumClass */
 template<> const EnumSymbols< MyEnumClass > esyms();
+template<> inline size_t eoffs_cls< MyEnumClass >()
+{
+    // same as strlen("MyEnumClass::")
+    return 13;
+}
+
 /** enum: auto-generated from myenum.hpp:21: C4_ENUM: MyBitmask */
 template<> const EnumSymbols< MyBitmask > esyms();
+template<> inline size_t eoffs_pfx< MyBitmask >()
+{
+    // same as strlen("BM_")
+    return 3;
+}
+
 /** enum: auto-generated from myenum.hpp:31: C4_ENUM: MyBitmaskClass */
 template<> const EnumSymbols< MyBitmaskClass > esyms();
+template<> inline size_t eoffs_cls< MyBitmaskClass >()
+{
+    // same as strlen("MyBitmaskClass::")
+    return 16;
+}
+template<> inline size_t eoffs_pfx< MyBitmaskClass >()
+{
+    // same as strlen("MyBitmaskClass::BM_")
+    return 19;
+}
+
 
 
 

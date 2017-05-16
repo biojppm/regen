@@ -46,6 +46,7 @@ template<> inline const EnumSymbols< MyEnum > esyms()
     EnumSymbols< MyEnum > r(vals);
     return r;
 }
+
 /** enum: auto-generated from myenum.hpp:14: C4_ENUM: MyEnumClass */
 template<> inline const EnumSymbols< MyEnumClass > esyms()
 {
@@ -57,6 +58,12 @@ template<> inline const EnumSymbols< MyEnumClass > esyms()
     EnumSymbols< MyEnumClass > r(vals);
     return r;
 }
+template<> inline size_t eoffs_cls< MyEnumClass >()
+{
+    // same as strlen("MyEnumClass::")
+    return 13;
+}
+
 /** enum: auto-generated from myenum.hpp:21: C4_ENUM: MyBitmask */
 template<> inline const EnumSymbols< MyBitmask > esyms()
 {
@@ -69,6 +76,12 @@ template<> inline const EnumSymbols< MyBitmask > esyms()
     EnumSymbols< MyBitmask > r(vals);
     return r;
 }
+template<> inline size_t eoffs_pfx< MyBitmask >()
+{
+    // same as strlen("BM_")
+    return 3;
+}
+
 /** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
 template<> inline const EnumSymbols< MyBitmaskClass > esyms()
 {
@@ -81,6 +94,17 @@ template<> inline const EnumSymbols< MyBitmaskClass > esyms()
     EnumSymbols< MyBitmaskClass > r(vals);
     return r;
 }
+template<> inline size_t eoffs_cls< MyBitmaskClass >()
+{
+    // same as strlen("MyBitmaskClass::")
+    return 16;
+}
+template<> inline size_t eoffs_pfx< MyBitmaskClass >()
+{
+    // same as strlen("MyBitmaskClass::BM_")
+    return 19;
+}
+
 
 
 // regen:GENERATED:(END). DO NOT EDIT THE BLOCK ABOVE. WILL BE OVERWRITTEN!
