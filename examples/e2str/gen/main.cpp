@@ -70,7 +70,10 @@ void test_bm2str()
                 val |= syms[i].value;
                 //printf("%d", i);
             }
-            //printf(": %s (%zu)\n", str.c_str(), (uint64_t)val);
+            //len = bm2str< E, I >(val); // needed length
+            //ws.resize(len);
+            //bm2str< E, I >(val, &ws[0], len);
+            //printf(": %s (%zu) %s\n", str.c_str(), (uint64_t)val, ws.data());
 
             res = str2bm< E, I >(str.data());
             EXPECT_EQ(res, val);
@@ -114,6 +117,6 @@ int main(int argc, const char* argv[])
     test_e2str< MyEnum >();
     test_e2str< MyEnumClass >();
     test_bm2str< MyBitmask >();
-    test_e2str< MyBitmaskClass >();
+    //test_bm2str< MyBitmaskClass >();
     return error_status;
 }

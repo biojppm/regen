@@ -34,7 +34,7 @@
 #define C4_CHECK(cond) \
     if(!(cond))\
     {\
-        C4_ERROR("check failed: ", #cond);\
+        C4_ERROR("check failed: " #cond);\
     }
 /** like C4_CHECK(), and additionally log a printf-style message.
  * @see C4_CHECK */

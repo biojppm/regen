@@ -32,11 +32,13 @@ template<> const EnumSymbols< MyBitmask > esyms()
         { BM_FOO, "BM_FOO"},
         { BM_BAR, "BM_BAR"},
         { BM_BAZ, "BM_BAZ"},
+        { BM_FOO_BAR, "BM_FOO_BAR"},
+        { BM_FOO_BAR_BAZ, "BM_FOO_BAR_BAZ"},
     };
     EnumSymbols< MyBitmask > r(vals);
     return r;
 }
-/** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
+/** enum: auto-generated from myenum.hpp:31: C4_ENUM: MyBitmaskClass */
 template<> const EnumSymbols< MyBitmaskClass > esyms()
 {
     static const EnumSymbols< MyBitmaskClass >::Sym vals[] = {
@@ -44,6 +46,8 @@ template<> const EnumSymbols< MyBitmaskClass > esyms()
         { MyBitmaskClass::BM_FOO, "MyBitmaskClass::BM_FOO"},
         { MyBitmaskClass::BM_BAR, "MyBitmaskClass::BM_BAR"},
         { MyBitmaskClass::BM_BAZ, "MyBitmaskClass::BM_BAZ"},
+        { MyBitmaskClass::BM_FOO_BAR, "MyBitmaskClass::BM_FOO_BAR"},
+        { MyBitmaskClass::BM_FOO_BAR_BAZ, "MyBitmaskClass::BM_FOO_BAR_BAZ"},
     };
     EnumSymbols< MyBitmaskClass > r(vals);
     return r;

@@ -24,6 +24,8 @@ typedef enum {
     BM_FOO = 1 << 0,
     BM_BAR = 1 << 1,
     BM_BAZ = 1 << 2,
+    BM_FOO_BAR = BM_FOO|BM_BAR,
+    BM_FOO_BAR_BAZ = BM_FOO|BM_BAR|BM_BAZ,
 } MyBitmask;
 
 C4_ENUM()
@@ -32,6 +34,8 @@ enum class MyBitmaskClass {
     BM_FOO = 1 << 0,
     BM_BAR = 1 << 1,
     BM_BAZ = 1 << 2,
+    BM_FOO_BAR = BM_FOO|BM_BAR,
+    BM_FOO_BAR_BAZ = BM_FOO|BM_BAR|BM_BAZ,
 };
 
 #endif // !_MYENUM_HPP_

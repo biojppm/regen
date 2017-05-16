@@ -11,7 +11,7 @@ template<> const EnumSymbols< MyEnum > esyms();
 template<> const EnumSymbols< MyEnumClass > esyms();
 /** enum: auto-generated from myenum.hpp:21: C4_ENUM: MyBitmask */
 template<> const EnumSymbols< MyBitmask > esyms();
-/** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
+/** enum: auto-generated from myenum.hpp:31: C4_ENUM: MyBitmaskClass */
 template<> const EnumSymbols< MyBitmaskClass > esyms();
 
 

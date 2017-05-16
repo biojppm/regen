@@ -44,7 +44,7 @@ size_t bm2str(I bits, char *str = nullptr, size_t sz = 0)
     }                                           \
     else if(str && sz)                          \
     {                                           \
-        C4_ERROR("cannot write to string pos=%zd num=%zd sz=%zd", pos, num, sz);     \
+        C4_ERROR("cannot write to string pos=%d num=%d sz=%d", (int)pos, (int)num, (int)sz);     \
     }                                           \
     pos += num
 
