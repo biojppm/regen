@@ -36,7 +36,13 @@ Stream& bm2stream(typename std::underlying_type<E>::type bits, Stream &s)
  * return the number of characters written. To find the needed size,
  * call first with str=nullptr and sz=0 */
 template< class E >
-size_t bm2str(typename std::underlying_type<E>::type bits, char *str = nullptr, size_t sz = 0)
+size_t bm2str
+(
+    typename std::underlying_type<E>::type bits,
+    char *str = nullptr,
+    size_t sz = 0,
+    EnumOffsetType offst = EOFFS_PFX
+)
 {
     using I = typename std::underlying_type<E>::type;
     C4_ASSERT((str == nullptr) == (sz == 0));
@@ -65,8 +71,9 @@ size_t bm2str(typename std::underlying_type<E>::type bits, char *str = nullptr, 
                 _c4appendchars(str[pos] = '|', 1);
             }
             // append bit string
-            size_t len = strlen(p.name);
-            _c4appendchars(strncpy(str+pos, p.name, len), len);
+            const char *pname = p.name_offs(offst);
+            size_t len = strlen(pname);
+            _c4appendchars(strncpy(str+pos, pname, len), len);
         }
     }
     C4_ASSERT(bits == 0);
@@ -74,8 +81,9 @@ size_t bm2str(typename std::underlying_type<E>::type bits, char *str = nullptr, 
     {
         if(zero) // if we have a zero symbol, use that
         {
-            size_t len = strlen(zero->name);
-            _c4appendchars(strncpy(str+pos, zero->name, len), len);
+            const char *pname = zero->name_offs(offst);
+            size_t len = strlen(pname);
+            _c4appendchars(strncpy(str+pos, pname, len), len);
         }
         else // otherwise just write an integer zero
         {
@@ -89,6 +97,32 @@ size_t bm2str(typename std::underlying_type<E>::type bits, char *str = nullptr, 
 // cleanup!
 #undef _c4appendchars
 }
+
+
+//! taken from http://stackoverflow.com/questions/15586163/c11-type-trait-to-differentiate-between-enum-class-and-regular-enum
+template< typename E >
+using is_scoped_enum = std::integral_constant<
+    bool,
+    std::is_enum<E>::value && !std::is_convertible<E, int>::value>;
+
+
+/** scoped enums do not convert automatically to their underlying type,
+ * so this SFINAE overload will accept scoped enum symbols and cast them
+ * to the underlying type */
+template< class E >
+typename std::enable_if< is_scoped_enum< E >::value, size_t >::type
+bm2str
+(
+    E bits,
+    char *str = nullptr,
+    size_t sz = 0,
+    EnumOffsetType offst = EOFFS_PFX
+)
+{
+    using I = typename std::underlying_type< E >::type;
+    return bm2str< E >(static_cast< I >(bits), str, sz, offst);
+}
+
 
 //-----------------------------------------------------------------------------
 
