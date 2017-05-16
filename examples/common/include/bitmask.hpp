@@ -52,7 +52,7 @@ size_t bm2str(I bits, char *str = nullptr, size_t sz = 0)
     typename EnumSymbols< T >::Sym const* zero = nullptr;
     for(auto const& p : esyms< T >())
     {
-        I b(p.value);
+        I b = static_cast< I >(p.value);
         if(b == 0)
         {
             zero = &p; // save this symbol for later
@@ -155,7 +155,7 @@ I str2bm(const char *str, size_t sz)
             {
                 auto *p = pairs.find(f, n);
                 C4_CHECK_MSG(p != nullptr, "no valid enum pair name for '%.*s'", (int)n, f);
-                val |= p->value;
+                val |= static_cast< I >(p->value);
             }
             started = num = alnum = false;
             if(*c == '\0')

@@ -67,7 +67,7 @@ void test_bm2str()
             {
                 if(!str.empty()) str += '|';
                 str += syms[i].name;
-                val |= syms[i].value;
+                val |= (I)syms[i].value;
                 //printf("%d", i);
             }
             //len = bm2str< E, I >(val); // needed length
@@ -117,6 +117,6 @@ int main(int argc, const char* argv[])
     test_e2str< MyEnum >();
     test_e2str< MyEnumClass >();
     test_bm2str< MyBitmask >();
-    //test_bm2str< MyBitmaskClass >();
+    test_bm2str< MyBitmaskClass >();
     return error_status;
 }
