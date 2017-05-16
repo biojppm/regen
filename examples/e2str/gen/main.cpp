@@ -4,9 +4,10 @@
 
 int main(int argc, const char* argv[])
 {
-    std::vector< char > ws_none(256);
+    std::vector< char > ws_all(256);
     std::vector< char > ws_cls(256);
     std::vector< char > ws_pfx(256);
+    std::vector< char > ws_default(256);
 
     EXPECT_EQ(eoffs_cls< MyEnum >(), 0);
     EXPECT_EQ(eoffs_pfx< MyEnum >(), 0);
@@ -35,19 +36,23 @@ int main(int argc, const char* argv[])
     EXPECT_BM_EQ(str2bm< MyBitmaskClass >("BM_FOO|BM_BAR"), MyBitmaskClass::BM_FOO_BAR);
     EXPECT_BM_EQ(str2bm< MyBitmaskClass >("FOO|BAR"), MyBitmaskClass::BM_FOO_BAR);
 
-    bm2str< MyBitmask >(BM_FOO_BAR, &ws_none[0], ws_none.size(), EOFFS_NONE);
+    bm2str< MyBitmask >(BM_FOO_BAR, &ws_all[0], ws_all.size(), EOFFS_NONE);
     bm2str< MyBitmask >(BM_FOO_BAR, &ws_cls[0], ws_cls.size(), EOFFS_CLS);
     bm2str< MyBitmask >(BM_FOO_BAR, &ws_pfx[0], ws_pfx.size(), EOFFS_PFX);
-    EXPECT_STR_EQ(ws_none.data(), "BM_FOO|BM_BAR");
+    bm2str< MyBitmask >(BM_FOO_BAR, &ws_default[0], ws_default.size());
+    EXPECT_STR_EQ(ws_all.data(), "BM_FOO|BM_BAR");
     EXPECT_STR_EQ(ws_cls.data(), "BM_FOO|BM_BAR");
     EXPECT_STR_EQ(ws_pfx.data(), "FOO|BAR");
+    EXPECT_STR_EQ(ws_default.data(), "FOO|BAR");
 
-    bm2str< MyBitmaskClass >(MyBitmaskClass::BM_FOO_BAR, &ws_none[0], ws_none.size(), EOFFS_NONE);
+    bm2str< MyBitmaskClass >(MyBitmaskClass::BM_FOO_BAR, &ws_all[0], ws_all.size(), EOFFS_NONE);
     bm2str< MyBitmaskClass >(MyBitmaskClass::BM_FOO_BAR, &ws_cls[0], ws_cls.size(), EOFFS_CLS);
     bm2str< MyBitmaskClass >(MyBitmaskClass::BM_FOO_BAR, &ws_pfx[0], ws_pfx.size(), EOFFS_PFX);
-    EXPECT_STR_EQ(ws_none.data(), "MyBitmaskClass::BM_FOO|MyBitmaskClass::BM_BAR");
+    bm2str< MyBitmaskClass >(MyBitmaskClass::BM_FOO_BAR, &ws_default[0], ws_default.size());
+    EXPECT_STR_EQ(ws_all.data(), "MyBitmaskClass::BM_FOO|MyBitmaskClass::BM_BAR");
     EXPECT_STR_EQ(ws_cls.data(), "BM_FOO|BM_BAR");
     EXPECT_STR_EQ(ws_pfx.data(), "FOO|BAR");
+    EXPECT_STR_EQ(ws_default.data(), "FOO|BAR");
 
     test_e2str< MyEnumClass >();
     test_e2str< MyEnum >();
