@@ -11,3 +11,7 @@ regen.egg-info/
 
 build
 install
+
+.cproject
+.project
+.settings/
