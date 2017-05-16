@@ -5,6 +5,11 @@
 #include <cstring>
 #include <iterator>
 
+typedef enum : uint8_t {
+    EOFFS_NONE = 0,
+    EOFFS_SYM = 1,
+    EOFFS_PFX = 2,
+} EnumOffsetType;
 
 //-----------------------------------------------------------------------------
 /** A simple (proxy) container for the value-name pairs of an enum type.
@@ -22,6 +27,8 @@ public:
 
         bool cmp(const char *s) const;
         bool cmp(const char *s, size_t len) const;
+
+        const char *name_offs(EnumOffsetType t) const;
     };
 
     using const_iterator = Sym const*;
@@ -66,16 +73,43 @@ template< class T >
 EnumSymbols< T > const esyms();
 
 /** return the offset at which the enum symbol starts. For example,
- * eoffs< MyEnumClass >() would be 13=strlen("MyEnumClass::")
+ * eoffs_sym< MyEnumClass >() would be 13=strlen("MyEnumClass::")
  *
- * @warning SPECIALIZE! This needs to be specialized for each C++11 enum
- * class type. */
+ * @warning SPECIALIZE! This needs to be specialized for each enum
+ * class type that wants to use this. */
 template< class T >
-size_t eoffs()
+size_t eoffs_sym()
 {
     return 0;
 }
 
+/** return the offset for an enum symbol prefix. This includes eoffs_sym().
+ * For example, eoffs< MyEnumClass >() would be 13=strlen("MyEnumClass::")
+ *
+ * @warning SPECIALIZE! This needs to be specialized for each enum
+ * class type that wants to use this. */
+template< class T >
+size_t eoffs_pfx()
+{
+    return 0;
+}
+
+template< class T >
+size_t eoffs(EnumOffsetType which)
+{
+    switch(which)
+    {
+    case EOFFS_NONE:
+        return 0;
+    case EOFFS_SYM:
+        return eoffs_sym< T >();
+    case EOFFS_PFX:
+        return eoffs_pfx< T >();
+    default:
+        C4_ERROR("unknown offset type");
+        return 0;
+    }
+}
 //-----------------------------------------------------------------------------
 /** get the enum value corresponding to a c-string */
 template< class T >
@@ -162,6 +196,13 @@ bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
     }
 
     return false;
+}
+
+//-----------------------------------------------------------------------------
+template< class T >
+const char* EnumSymbols< T >::Sym::name_offs(EnumOffsetType t) const
+{
+    return name + eoffs< T >(t);
 }
 
 #endif // _C4_ENUM_HPP_
