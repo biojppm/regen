@@ -41,7 +41,7 @@
 #define C4_CHECK_MSG(cond, fmt, ...) \
     if(!(cond))\
     {\
-        C4_ERROR("check failed: " #cond "\n" fmt, ## __VA_ARGS__);\
+        C4_ERROR("check failed: " #cond "\n" "%s:%d: " fmt, __FILE__, __LINE__, ## __VA_ARGS__);\
     }
 
 // assertions - only in debug builds

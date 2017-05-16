@@ -9,6 +9,12 @@
 template<> const EnumSymbols< MyEnum > esyms();
 /** enum: auto-generated from myenum.hpp:14: C4_ENUM: MyEnumClass */
 template<> const EnumSymbols< MyEnumClass > esyms();
+/** enum: auto-generated from myenum.hpp:21: C4_ENUM: MyBitmask */
+template<> const EnumSymbols< MyBitmask > esyms();
+/** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
+template<> const EnumSymbols< MyBitmaskClass > esyms();
+
+
 
 
 

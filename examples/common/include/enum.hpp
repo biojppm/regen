@@ -40,6 +40,8 @@ public:
     Sym const* find(const char *s) const;
     Sym const* find(const char *s, size_t len) const;
 
+    Sym const& operator[] (size_t i) { C4_CHECK(i < m_num); return m_symbols[i]; }
+
 private:
 
     Sym const* m_symbols;
@@ -140,7 +142,7 @@ bool EnumSymbols< T >::Sym::cmp(const char *s) const
 template< class T >
 bool EnumSymbols< T >::Sym::cmp(const char *s, size_t len) const
 {
-    if(strcmp(name, s) == 0)
+    if(strncmp(name, s, len) == 0)
         return true;
 
     auto o = eoffs< T >();

@@ -24,3 +24,27 @@ template<> const EnumSymbols< MyEnumClass > esyms()
     EnumSymbols< MyEnumClass > r(vals);
     return r;
 }
+/** enum: auto-generated from myenum.hpp:21: C4_ENUM: MyBitmask */
+template<> const EnumSymbols< MyBitmask > esyms()
+{
+    static const EnumSymbols< MyBitmask >::Sym vals[] = {
+        { BM_NONE, "BM_NONE"},
+        { BM_FOO, "BM_FOO"},
+        { BM_BAR, "BM_BAR"},
+        { BM_BAZ, "BM_BAZ"},
+    };
+    EnumSymbols< MyBitmask > r(vals);
+    return r;
+}
+/** enum: auto-generated from myenum.hpp:29: C4_ENUM: MyBitmaskClass */
+template<> const EnumSymbols< MyBitmaskClass > esyms()
+{
+    static const EnumSymbols< MyBitmaskClass >::Sym vals[] = {
+        { MyBitmaskClass::BM_NONE, "MyBitmaskClass::BM_NONE"},
+        { MyBitmaskClass::BM_FOO, "MyBitmaskClass::BM_FOO"},
+        { MyBitmaskClass::BM_BAR, "MyBitmaskClass::BM_BAR"},
+        { MyBitmaskClass::BM_BAZ, "MyBitmaskClass::BM_BAZ"},
+    };
+    EnumSymbols< MyBitmaskClass > r(vals);
+    return r;
+}
