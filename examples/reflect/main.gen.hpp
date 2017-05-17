@@ -40,9 +40,9 @@ struct serialize_category< TestStruct >
 template <class Stream>
 void TestStruct::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< float >(a, "x", &x);
-    serialize< float >(a, "y", &y);
-    serialize< float >(a, "z", &z);
+    c4::serialize< float >(a, "x", &x);
+    c4::serialize< float >(a, "y", &y);
+    c4::serialize< float >(a, "z", &z);
 }
 /** imgui: auto-generated from main.hpp:30: C4_CLASS: TestStruct */
 
@@ -60,10 +60,10 @@ template <class T>
 template <class Stream>
 void TestTpl<T>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T >(a, "r", &r);
-    serialize< T >(a, "g", &g);
-    serialize< T >(a, "b", &b);
-    serialize< T >(a, "a", &a);
+    c4::serialize< T >(a, "r", &r);
+    c4::serialize< T >(a, "g", &g);
+    c4::serialize< T >(a, "b", &b);
+    c4::serialize< T >(a, "a", &a);
 }
 /** imgui: auto-generated from main.hpp:37: C4_CLASS: TestTpl<T> */
 
@@ -81,8 +81,8 @@ template <class T, class U>
 template <class Stream>
 void TestTpl2<T, U>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T >(a, "x", &x);
-    serialize< U >(a, "y", &y);
+    c4::serialize< T >(a, "x", &x);
+    c4::serialize< U >(a, "y", &y);
 }
 /** imgui: auto-generated from main.hpp:44: C4_CLASS: TestTpl2<T, U> */
 
@@ -100,9 +100,9 @@ template <class T, class U, class V>
 template <class Stream>
 void TestTpl3<T, U, V>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T >(a, "x", &x);
-    serialize< U >(a, "y", &y);
-    serialize< V >(a, "z", &z);
+    c4::serialize< T >(a, "x", &x);
+    c4::serialize< U >(a, "y", &y);
+    c4::serialize< V >(a, "z", &z);
 }
 /** imgui: auto-generated from main.hpp:52: C4_CLASS: TestTpl3<T, U, V> */
 
@@ -120,9 +120,9 @@ template <class T, class U, class V, int N>
 template <class Stream>
 void TestTpl4<T, U, V, N>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T [N] >(a, "x", &x);
-    serialize< U [N] >(a, "y", &y);
-    serialize< V [N] >(a, "z", &z);
+    c4::serialize< T [N] >(a, "x", &x);
+    c4::serialize< U [N] >(a, "y", &y);
+    c4::serialize< V [N] >(a, "z", &z);
 }
 /** imgui: auto-generated from main.hpp:61: C4_CLASS: TestTpl4<T, U, V, N> */
 
@@ -140,10 +140,10 @@ template <class T, class U, class V, int N, template<class> class  AAA>
 template <class Stream>
 void TestTpl51<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T [N] >(a, "x", &x);
-    serialize< U [N] >(a, "y", &y);
-    serialize< V [N] >(a, "z", &z);
-    serialize< AAA<T> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &x);
+    c4::serialize< U [N] >(a, "y", &y);
+    c4::serialize< V [N] >(a, "z", &z);
+    c4::serialize< AAA<T> >(a, "w", &w);
 }
 /** imgui: auto-generated from main.hpp:70: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
 
@@ -161,10 +161,10 @@ template <class T, class U, class V, int N, template<class, class> class  AAA>
 template <class Stream>
 void TestTpl52<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T [N] >(a, "x", &x);
-    serialize< U [N] >(a, "y", &y);
-    serialize< V [N] >(a, "z", &z);
-    serialize< AAA<T, U> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &x);
+    c4::serialize< U [N] >(a, "y", &y);
+    c4::serialize< V [N] >(a, "z", &z);
+    c4::serialize< AAA<T, U> >(a, "w", &w);
 }
 /** imgui: auto-generated from main.hpp:80: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
 
@@ -182,10 +182,10 @@ template <class T, class U, class V, int N, template<class, class, class> class 
 template <class Stream>
 void TestTpl53<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T [N] >(a, "x", &x);
-    serialize< U [N] >(a, "y", &y);
-    serialize< V [N] >(a, "z", &z);
-    serialize< AAA<T, U, V> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &x);
+    c4::serialize< U [N] >(a, "y", &y);
+    c4::serialize< V [N] >(a, "z", &z);
+    c4::serialize< AAA<T, U, V> >(a, "w", &w);
 }
 /** imgui: auto-generated from main.hpp:90: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
 
@@ -203,10 +203,10 @@ template <class T, class U, class V, int N, template<class, class, class, int> c
 template <class Stream>
 void TestTpl54<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< T [N] >(a, "x", &x);
-    serialize< U [N] >(a, "y", &y);
-    serialize< V [N] >(a, "z", &z);
-    serialize< AAA<T, U, V, N> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &x);
+    c4::serialize< U [N] >(a, "y", &y);
+    c4::serialize< V [N] >(a, "z", &z);
+    c4::serialize< AAA<T, U, V, N> >(a, "w", &w);
 }
 /** imgui: auto-generated from main.hpp:100: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
 
@@ -223,15 +223,15 @@ struct serialize_category< ThisIsATest >
 template <class Stream>
 void ThisIsATest::serialize(c4::Archive< Stream > &a, const char* name)
 {
-    serialize< bool >(a, "bdata", &bdata);
-    serialize< char >(a, "mode_data", &mode_data);
-    serialize< int >(a, "prop", &prop);
-    serialize< int >(a, "prop2", &prop2);
-    serialize< float >(a, "more_data", &more_data);
-    serialize< double >(a, "yet_more_data", &yet_more_data);
-    serialize< TestEnum_e >(a, "ste", &ste);
-    serialize< TestStruct >(a, "ts", &ts);
-    serialize< TestTpl<uint32_t> >(a, "ttpl", &ttpl);
+    c4::serialize< bool >(a, "bdata", &bdata);
+    c4::serialize< char >(a, "mode_data", &mode_data);
+    c4::serialize< int >(a, "prop", &prop);
+    c4::serialize< int >(a, "prop2", &prop2);
+    c4::serialize< float >(a, "more_data", &more_data);
+    c4::serialize< double >(a, "yet_more_data", &yet_more_data);
+    c4::serialize< TestEnum_e >(a, "ste", &ste);
+    c4::serialize< TestStruct >(a, "ts", &ts);
+    c4::serialize< TestTpl<uint32_t> >(a, "ttpl", &ttpl);
 }
 /** imgui: auto-generated from main.hpp:110: C4_CLASS: ThisIsATest */
 

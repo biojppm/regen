@@ -55,7 +55,7 @@ template <class Stream>
 void {{type}}::serialize(c4::Archive< Stream > &a, const char* name)
 {
     {% for m in members %}
-    serialize< {{m.type}} >(a, "{{m.name}}", &{{m.name}});
+    c4::serialize< {{m.type}} >(a, "{{m.name}}", &{{m.name}});
     {% endfor %}
 }
 """,
