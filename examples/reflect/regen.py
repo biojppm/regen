@@ -4,7 +4,7 @@ import c4.regen as regen
 
 egen = regen.EnumGenerator(
     hdr_preamble='#include "enum.hpp"',
-    hdr="""
+    hdr="""\
 template<> const EnumSymbols< {{enum.type}} > esyms();
 {% if enum.class_offset > 0 %}
 template<> inline size_t eoffs_cls< {{enum.type}} >()
@@ -21,7 +21,7 @@ template<> inline size_t eoffs_pfx< {{enum.type}} >()
 }
 {% endif %}
 """,
-    src="""
+    src="""\
 template<> const EnumSymbols< {{enum.type}} > esyms()
 {
     static const EnumSymbols< {{enum.type}} >::Sym vals[] = {
@@ -38,32 +38,28 @@ template<> const EnumSymbols< {{enum.type}} > esyms()
 # ------------------------------------------------------------------------------
 
 serialize = regen.ClassGenerator(
-name="serialize",
-hdr_preamble='#include "serialize.hpp"',
-hdr="""
+    name="serialize",
+    hdr_preamble='#include "serialize.hpp"',
+    hdr="""\
 namespace c4 {
 template <{{tpl_params}}>
 struct serialize_category< {{type}} >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <{% if tpl_params %}{{tpl_params}}, {% endif %}class Stream>
-struct srlz_custom< {{type}}, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, {{type}} *var)
-    {
-        {% for m in members %}
-        serialize< {{m.type}} >(a, "{{m.name}}", &var->{{m.name}});
-        {% endfor %}
-    }
-    static void s(Archive< Stream > &a, const char* name, {{type}} *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
+{%if tpl_params %}
+template <{{tpl_params}}>
+{% endif %}
+template <class Stream>
+void {{type}}::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    {% for m in members %}
+    serialize< {{m.type}} >(a, "{{m.name}}", &{{m.name}});
+    {% endfor %}
+}
 """,
-    src="""
+    src="""\
 """,
 )
 
@@ -71,10 +67,10 @@ struct srlz_custom< {{type}}, Stream >
 
 imgui = regen.ClassGenerator(
     name="imgui",
-    hdr="""
+    hdr="""\
 // {{type}}
 """,
-    src="""
+    src="""\
 // {{type}}
 """,
 )

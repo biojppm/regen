@@ -5,9 +5,8 @@
 
 #include "main.hpp"
 
-/** enum: auto-generated from main.hpp:7: C4_ENUM: TestEnum_e */
+/** enum: auto-generated from main.hpp:8: C4_ENUM: TestEnum_e */
 #include "enum.hpp"
-
 template<> const EnumSymbols< TestEnum_e > esyms();
 template<> inline size_t eoffs_pfx< TestEnum_e >()
 {
@@ -15,9 +14,8 @@ template<> inline size_t eoffs_pfx< TestEnum_e >()
     return 3;
 }
 
-/** enum: auto-generated from main.hpp:14: C4_ENUM: TestEnumClass_e */
+/** enum: auto-generated from main.hpp:15: C4_ENUM: TestEnumClass_e */
 #include "enum.hpp"
-
 template<> const EnumSymbols< TestEnumClass_e > esyms();
 template<> inline size_t eoffs_cls< TestEnumClass_e >()
 {
@@ -30,299 +28,216 @@ template<> inline size_t eoffs_pfx< TestEnumClass_e >()
     return 21;
 }
 
-/** serialize: auto-generated from main.hpp:29: C4_CLASS: TestStruct */
+/** serialize: auto-generated from main.hpp:30: C4_CLASS: TestStruct */
 #include "serialize.hpp"
-
 namespace c4 {
 template <>
 struct serialize_category< TestStruct >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class Stream>
-struct srlz_custom< TestStruct, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestStruct *var)
-    {
-        serialize< float >(a, "x", &var->x);
-        serialize< float >(a, "y", &var->y);
-        serialize< float >(a, "z", &var->z);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestStruct *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:29: C4_CLASS: TestStruct */
-
+template <class Stream>
+void TestStruct::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< float >(a, "x", &x);
+    serialize< float >(a, "y", &y);
+    serialize< float >(a, "z", &z);
+}
+/** imgui: auto-generated from main.hpp:30: C4_CLASS: TestStruct */
 
 // TestStruct
-/** serialize: auto-generated from main.hpp:35: C4_CLASS: TestTpl<T> */
+/** serialize: auto-generated from main.hpp:37: C4_CLASS: TestTpl<T> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T>
 struct serialize_category< TestTpl<T> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class Stream>
-struct srlz_custom< TestTpl<T>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl<T> *var)
-    {
-        serialize< T >(a, "r", &var->r);
-        serialize< T >(a, "g", &var->g);
-        serialize< T >(a, "b", &var->b);
-        serialize< T >(a, "a", &var->a);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl<T> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:35: C4_CLASS: TestTpl<T> */
-
+template <class T>
+template <class Stream>
+void TestTpl<T>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T >(a, "r", &r);
+    serialize< T >(a, "g", &g);
+    serialize< T >(a, "b", &b);
+    serialize< T >(a, "a", &a);
+}
+/** imgui: auto-generated from main.hpp:37: C4_CLASS: TestTpl<T> */
 
 // TestTpl<T>
-/** serialize: auto-generated from main.hpp:41: C4_CLASS: TestTpl2<T, U> */
+/** serialize: auto-generated from main.hpp:44: C4_CLASS: TestTpl2<T, U> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U>
 struct serialize_category< TestTpl2<T, U> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class Stream>
-struct srlz_custom< TestTpl2<T, U>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl2<T, U> *var)
-    {
-        serialize< T >(a, "x", &var->x);
-        serialize< U >(a, "y", &var->y);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl2<T, U> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:41: C4_CLASS: TestTpl2<T, U> */
-
+template <class T, class U>
+template <class Stream>
+void TestTpl2<T, U>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T >(a, "x", &x);
+    serialize< U >(a, "y", &y);
+}
+/** imgui: auto-generated from main.hpp:44: C4_CLASS: TestTpl2<T, U> */
 
 // TestTpl2<T, U>
-/** serialize: auto-generated from main.hpp:48: C4_CLASS: TestTpl3<T, U, V> */
+/** serialize: auto-generated from main.hpp:52: C4_CLASS: TestTpl3<T, U, V> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V>
 struct serialize_category< TestTpl3<T, U, V> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, class Stream>
-struct srlz_custom< TestTpl3<T, U, V>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl3<T, U, V> *var)
-    {
-        serialize< T >(a, "x", &var->x);
-        serialize< U >(a, "y", &var->y);
-        serialize< V >(a, "z", &var->z);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl3<T, U, V> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:48: C4_CLASS: TestTpl3<T, U, V> */
-
+template <class T, class U, class V>
+template <class Stream>
+void TestTpl3<T, U, V>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T >(a, "x", &x);
+    serialize< U >(a, "y", &y);
+    serialize< V >(a, "z", &z);
+}
+/** imgui: auto-generated from main.hpp:52: C4_CLASS: TestTpl3<T, U, V> */
 
 // TestTpl3<T, U, V>
-/** serialize: auto-generated from main.hpp:56: C4_CLASS: TestTpl4<T, U, V, N> */
+/** serialize: auto-generated from main.hpp:61: C4_CLASS: TestTpl4<T, U, V, N> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V, int N>
 struct serialize_category< TestTpl4<T, U, V, N> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, int N, class Stream>
-struct srlz_custom< TestTpl4<T, U, V, N>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl4<T, U, V, N> *var)
-    {
-        serialize< T [N] >(a, "x", &var->x);
-        serialize< U [N] >(a, "y", &var->y);
-        serialize< V [N] >(a, "z", &var->z);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl4<T, U, V, N> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:56: C4_CLASS: TestTpl4<T, U, V, N> */
-
+template <class T, class U, class V, int N>
+template <class Stream>
+void TestTpl4<T, U, V, N>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T [N] >(a, "x", &x);
+    serialize< U [N] >(a, "y", &y);
+    serialize< V [N] >(a, "z", &z);
+}
+/** imgui: auto-generated from main.hpp:61: C4_CLASS: TestTpl4<T, U, V, N> */
 
 // TestTpl4<T, U, V, N>
-/** serialize: auto-generated from main.hpp:64: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
+/** serialize: auto-generated from main.hpp:70: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V, int N, template<class> class  AAA>
 struct serialize_category< TestTpl51<T, U, V, N, AAA> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, int N, template<class> class  AAA, class Stream>
-struct srlz_custom< TestTpl51<T, U, V, N, AAA>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl51<T, U, V, N, AAA> *var)
-    {
-        serialize< T [N] >(a, "x", &var->x);
-        serialize< U [N] >(a, "y", &var->y);
-        serialize< V [N] >(a, "z", &var->z);
-        serialize< AAA<T> >(a, "w", &var->w);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl51<T, U, V, N, AAA> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:64: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
-
+template <class T, class U, class V, int N, template<class> class  AAA>
+template <class Stream>
+void TestTpl51<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T [N] >(a, "x", &x);
+    serialize< U [N] >(a, "y", &y);
+    serialize< V [N] >(a, "z", &z);
+    serialize< AAA<T> >(a, "w", &w);
+}
+/** imgui: auto-generated from main.hpp:70: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
 
 // TestTpl51<T, U, V, N, AAA>
-/** serialize: auto-generated from main.hpp:73: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
+/** serialize: auto-generated from main.hpp:80: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class> class  AAA>
 struct serialize_category< TestTpl52<T, U, V, N, AAA> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, int N, template<class, class> class  AAA, class Stream>
-struct srlz_custom< TestTpl52<T, U, V, N, AAA>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl52<T, U, V, N, AAA> *var)
-    {
-        serialize< T [N] >(a, "x", &var->x);
-        serialize< U [N] >(a, "y", &var->y);
-        serialize< V [N] >(a, "z", &var->z);
-        serialize< AAA<T, U> >(a, "w", &var->w);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl52<T, U, V, N, AAA> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:73: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
-
+template <class T, class U, class V, int N, template<class, class> class  AAA>
+template <class Stream>
+void TestTpl52<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T [N] >(a, "x", &x);
+    serialize< U [N] >(a, "y", &y);
+    serialize< V [N] >(a, "z", &z);
+    serialize< AAA<T, U> >(a, "w", &w);
+}
+/** imgui: auto-generated from main.hpp:80: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
 
 // TestTpl52<T, U, V, N, AAA>
-/** serialize: auto-generated from main.hpp:82: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
+/** serialize: auto-generated from main.hpp:90: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class, class> class  AAA>
 struct serialize_category< TestTpl53<T, U, V, N, AAA> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, int N, template<class, class, class> class  AAA, class Stream>
-struct srlz_custom< TestTpl53<T, U, V, N, AAA>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl53<T, U, V, N, AAA> *var)
-    {
-        serialize< T [N] >(a, "x", &var->x);
-        serialize< U [N] >(a, "y", &var->y);
-        serialize< V [N] >(a, "z", &var->z);
-        serialize< AAA<T, U, V> >(a, "w", &var->w);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl53<T, U, V, N, AAA> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:82: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
-
+template <class T, class U, class V, int N, template<class, class, class> class  AAA>
+template <class Stream>
+void TestTpl53<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T [N] >(a, "x", &x);
+    serialize< U [N] >(a, "y", &y);
+    serialize< V [N] >(a, "z", &z);
+    serialize< AAA<T, U, V> >(a, "w", &w);
+}
+/** imgui: auto-generated from main.hpp:90: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
 
 // TestTpl53<T, U, V, N, AAA>
-/** serialize: auto-generated from main.hpp:91: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
+/** serialize: auto-generated from main.hpp:100: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
 #include "serialize.hpp"
-
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class, class, int> class  AAA>
 struct serialize_category< TestTpl54<T, U, V, N, AAA> >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class T, class U, class V, int N, template<class, class, class, int> class  AAA, class Stream>
-struct srlz_custom< TestTpl54<T, U, V, N, AAA>, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, TestTpl54<T, U, V, N, AAA> *var)
-    {
-        serialize< T [N] >(a, "x", &var->x);
-        serialize< U [N] >(a, "y", &var->y);
-        serialize< V [N] >(a, "z", &var->z);
-        serialize< AAA<T, U, V, N> >(a, "w", &var->w);
-    }
-    static void s(Archive< Stream > &a, const char* name, TestTpl54<T, U, V, N, AAA> *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:91: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
-
+template <class T, class U, class V, int N, template<class, class, class, int> class  AAA>
+template <class Stream>
+void TestTpl54<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< T [N] >(a, "x", &x);
+    serialize< U [N] >(a, "y", &y);
+    serialize< V [N] >(a, "z", &z);
+    serialize< AAA<T, U, V, N> >(a, "w", &w);
+}
+/** imgui: auto-generated from main.hpp:100: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
 
 // TestTpl54<T, U, V, N, AAA>
-/** serialize: auto-generated from main.hpp:100: C4_CLASS: ThisIsATest */
+/** serialize: auto-generated from main.hpp:110: C4_CLASS: ThisIsATest */
 #include "serialize.hpp"
-
 namespace c4 {
 template <>
 struct serialize_category< ThisIsATest >
 {
-    enum : int { value = SerializeCategory_e::CUSTOM };
-};
-template <class Stream>
-struct srlz_custom< ThisIsATest, Stream >
-{
-    static void s(Archive< Stream > &a, const char* name, ThisIsATest *var)
-    {
-        serialize< bool >(a, "bdata", &var->bdata);
-        serialize< char >(a, "mode_data", &var->mode_data);
-        serialize< int >(a, "prop", &var->prop);
-        serialize< int >(a, "prop2", &var->prop2);
-        serialize< float >(a, "more_data", &var->more_data);
-        serialize< double >(a, "yet_more_data", &var->yet_more_data);
-        serialize< TestEnum_e >(a, "ste", &var->ste);
-        serialize< TestStruct >(a, "ts", &var->ts);
-        serialize< TestTpl<uint32_t> >(a, "ttpl", &var->ttpl);
-    }
-    static void s(Archive< Stream > &a, const char* name, ThisIsATest *var, size_t num)
-    {
-        a(name, var, num);
-    }
+    enum : int { value = (int)SerializeCategory_e::METHOD };
 };
 } // end namespace c4
-/** imgui: auto-generated from main.hpp:100: C4_CLASS: ThisIsATest */
-
+template <class Stream>
+void ThisIsATest::serialize(c4::Archive< Stream > &a, const char* name)
+{
+    serialize< bool >(a, "bdata", &bdata);
+    serialize< char >(a, "mode_data", &mode_data);
+    serialize< int >(a, "prop", &prop);
+    serialize< int >(a, "prop2", &prop2);
+    serialize< float >(a, "more_data", &more_data);
+    serialize< double >(a, "yet_more_data", &yet_more_data);
+    serialize< TestEnum_e >(a, "ste", &ste);
+    serialize< TestStruct >(a, "ts", &ts);
+    serialize< TestTpl<uint32_t> >(a, "ttpl", &ttpl);
+}
+/** imgui: auto-generated from main.hpp:110: C4_CLASS: ThisIsATest */
 
 // ThisIsATest
-/** enum: auto-generated from main.hpp:103: C4_ENUM: ThisIsATest::TTestEnum_e */
+/** enum: auto-generated from main.hpp:113: C4_ENUM: ThisIsATest::TTestEnum_e */
 #include "enum.hpp"
-
 template<> const EnumSymbols< ThisIsATest::TTestEnum_e > esyms();
 template<> inline size_t eoffs_pfx< ThisIsATest::TTestEnum_e >()
 {

@@ -2,8 +2,7 @@
 
 #include "main.gen.hpp"
 
-/** enum: auto-generated from main.hpp:7: C4_ENUM: TestEnum_e */
-
+/** enum: auto-generated from main.hpp:8: C4_ENUM: TestEnum_e */
 
 template<> const EnumSymbols< TestEnum_e > esyms()
 {
@@ -15,8 +14,7 @@ template<> const EnumSymbols< TestEnum_e > esyms()
     EnumSymbols< TestEnum_e > r(vals);
     return r;
 }
-/** enum: auto-generated from main.hpp:14: C4_ENUM: TestEnumClass_e */
-
+/** enum: auto-generated from main.hpp:15: C4_ENUM: TestEnumClass_e */
 
 template<> const EnumSymbols< TestEnumClass_e > esyms()
 {
@@ -35,57 +33,46 @@ template<> const EnumSymbols< TestEnumClass_e > esyms()
     return r;
 }
 
-/** imgui: auto-generated from main.hpp:29: C4_CLASS: TestStruct */
-
+/** imgui: auto-generated from main.hpp:30: C4_CLASS: TestStruct */
 
 // TestStruct
 
-/** imgui: auto-generated from main.hpp:35: C4_CLASS: TestTpl<T> */
-
+/** imgui: auto-generated from main.hpp:37: C4_CLASS: TestTpl<T> */
 
 // TestTpl<T>
 
-/** imgui: auto-generated from main.hpp:41: C4_CLASS: TestTpl2<T, U> */
-
+/** imgui: auto-generated from main.hpp:44: C4_CLASS: TestTpl2<T, U> */
 
 // TestTpl2<T, U>
 
-/** imgui: auto-generated from main.hpp:48: C4_CLASS: TestTpl3<T, U, V> */
-
+/** imgui: auto-generated from main.hpp:52: C4_CLASS: TestTpl3<T, U, V> */
 
 // TestTpl3<T, U, V>
 
-/** imgui: auto-generated from main.hpp:56: C4_CLASS: TestTpl4<T, U, V, N> */
-
+/** imgui: auto-generated from main.hpp:61: C4_CLASS: TestTpl4<T, U, V, N> */
 
 // TestTpl4<T, U, V, N>
 
-/** imgui: auto-generated from main.hpp:64: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
-
+/** imgui: auto-generated from main.hpp:70: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
 
 // TestTpl51<T, U, V, N, AAA>
 
-/** imgui: auto-generated from main.hpp:73: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
-
+/** imgui: auto-generated from main.hpp:80: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
 
 // TestTpl52<T, U, V, N, AAA>
 
-/** imgui: auto-generated from main.hpp:82: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
-
+/** imgui: auto-generated from main.hpp:90: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
 
 // TestTpl53<T, U, V, N, AAA>
 
-/** imgui: auto-generated from main.hpp:91: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
-
+/** imgui: auto-generated from main.hpp:100: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
 
 // TestTpl54<T, U, V, N, AAA>
 
-/** imgui: auto-generated from main.hpp:100: C4_CLASS: ThisIsATest */
-
+/** imgui: auto-generated from main.hpp:110: C4_CLASS: ThisIsATest */
 
 // ThisIsATest
-/** enum: auto-generated from main.hpp:103: C4_ENUM: ThisIsATest::TTestEnum_e */
-
+/** enum: auto-generated from main.hpp:113: C4_ENUM: ThisIsATest::TTestEnum_e */
 
 template<> const EnumSymbols< ThisIsATest::TTestEnum_e > esyms()
 {

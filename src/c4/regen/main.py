@@ -301,6 +301,10 @@ class Class(CodeEntity):
     def add_prop(self, p):
         self.props.append(p)
 
+    def inject_code(self, code, at_end=True):
+        "if at_end is False, code is injected at the beginning"
+        pass  # @todo
+
 
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------

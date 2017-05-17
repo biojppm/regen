@@ -2,17 +2,26 @@
 #define _C4_SERIALIZE_HPP_
 
 #include <type_traits>
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "util.hpp"
+
 
 namespace c4 {
 
 // forward declarations
-template< class Stream >
-class Archive;
+template< class Stream > class Archive;
+template< class T, class Stream > void serialize(Archive< Stream > &a, const char* name, T *var);
+template< class T, class Stream > void serialize(Archive< Stream > &a, const char* name, T *var, size_t num);
 
-template< class T, class Stream >
-inline void serialize(Archive< Stream > &a, const char* name, T *var);
-template< class T, class Stream >
-inline void serialize(Archive< Stream > &a, const char* name, T *var, size_t num);
+#define C4_DECLARE_SERIALIZE_METHOD()                               \
+    public:                                                         \
+    template< class Stream >                                        \
+        void serialize(c4::Archive< Stream > &a, const char* name); \
+    private:
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -28,7 +37,7 @@ inline void serialize(Archive< Stream > &a, const char* name, T *var, size_t num
  *-----------------+--------------------------+---------------------------------
  * CUSTOM          |   N * (c4::serialize())  |     N * (c4::serialize())
  *-----------------+--------------------------+---------------------------------
- * CUSTOM_TXT      |      1 * memcpy()        |     N * (c4::serialize())
+ * CUSTOM_METHOD   |   N * (var->serialize()) |     N * (var->serialize())
  *-----------------+--------------------------+---------------------------------
  */
 enum class SerializeCategory_e : int
@@ -38,19 +47,20 @@ enum class SerializeCategory_e : int
     NATIVE = 0,
     /** for classes that provide specializations of c4::serialize(). */
     CUSTOM,
+    /** for classes that provide a member serialize() method. */
+    METHOD,
     /** mix between NATIVE and CUSTOM: memcpy() for binary archives,
      * but uses specialization of c4::serialize() for text archives
      * @todo implement this*/
     // CUSTOM_TXT,
 
-    //inline operator int () const { return static_cast< int >(*this); }
     //inline bool operator== (int v) const { return static_cast< SerializeCategory_e >(v) == *this; }
 };
 
 template< class T >
 struct serialize_category
 {
-    enum : int { value = (int)SerializeCategory_e::NATIVE };
+    enum : int { value = static_cast< int >(SerializeCategory_e::NATIVE) };
 };
 /** makes C-style arrays use their type without extent */
 template< class T >
@@ -106,7 +116,14 @@ public:
     _c4sfinae(void, CUSTOM) operator()(const char* name, T *var)
     {
         push(name);
-        serialize(*this, name, var);
+        c4::serialize(*this, name, var);
+        pop(name);
+    }
+    template< class T >
+    _c4sfinae(void, METHOD) operator()(const char* name, T *var)
+    {
+        push(name);
+        var->serialize(*this, name);
         pop(name);
     }
 
@@ -115,7 +132,7 @@ public:
     {
         push_seq(name, num);
         m_stream(var, num);
-        pop_seq(name);
+        pop_seq(name, num);
     }
     template< class T >
     _c4sfinae(void, CUSTOM) operator()(const char* name, T *var, size_t num)
@@ -123,7 +140,17 @@ public:
         push_seq(name, num);
         for(size_t i = 0; i < num; ++i)
         {
-            serialize(*this, name, var + i);
+            c4::serialize(*this, name, var + i);
+        }
+        pop_seq(name, num);
+    }
+    template< class T >
+    _c4sfinae(void, METHOD) operator()(const char* name, T *var, size_t num)
+    {
+        push_seq(name, num);
+        for(size_t i = 0; i < num; ++i)
+        {
+            (var + i)->serialize(*this, name);
         }
         pop_seq(name, num);
     }
@@ -133,7 +160,13 @@ public:
     void push_seq(const char* name, size_t num) { m_stream.push_seq(name, num); }
     void pop_seq(const char* name, size_t num) { m_stream.pop_seq(name, num); }
 
-private:
+    template< class... Args >
+    void write_mode(bool yes, Args&&... args)
+    {
+        m_stream.write_mode(yes, std::forward< Args >(args)...);
+    }
+
+public:
 
     ArchiveMode_e m_mode;
 
@@ -147,31 +180,162 @@ private:
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
-/** utility struct to allow specialization. When specializing, the
+/** utility function to allow specialization. When specializing, the
  * serialize_category<>::value must be set to custom.  */
-template< class T, class Stream >
-struct srlz_custom
-{
-    static void s(Archive< Stream > &a, const char* name, T *var)
-    {
-        a(name, var);
-    }
-    static void s(Archive< Stream > &a, const char* name, T *var, size_t num)
-    {
-        a(name, var, num);
-    }
-};
-
 template< class T, class Stream >
 void serialize(Archive< Stream > &a, const char* name, T *var)
 {
-    srlz_custom< T, Stream >::s(a, name, var);
+    a(name, var);
 }
 template< class T, class Stream >
 void serialize(Archive< Stream > &a, const char* name, T *var, size_t num)
 {
-    srlz_custom< T, Stream >::s(a, name, var, num);
+    a(name, var, num);
 }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+struct ArchiveStreamText
+{
+
+    bool writing = true;
+    int level = 0;
+    FILE* file = nullptr;
+#ifdef C4_DEBUG
+    std::vector< char > name_check;
+#endif
+
+    void write_mode(bool yes, FILE *which = nullptr)
+    {
+        if(yes)
+        {
+            writing = true;
+            file = which ? which : stdout;
+        }
+        else
+        {
+            writing = false;
+            file = which ? which : stdin;
+        }
+    }
+
+    void push_var(const char *name)
+    {
+        if(writing)
+        {
+            _indentw();
+            fprintf(file, "%s ", name);
+        }
+        else
+        {
+            _indentr();
+            int len, conv;
+            conv = fscanf(file, "%*s%n ", &len);
+            //C4_CHECK(conv == 1);
+            C4_CHECK(len == strlen(name));
+        }
+        ++level;
+    }
+
+    template< class T >
+    void operator() (T *var)
+    {
+        if(writing)
+        {
+            fprintf(file, fmttag< T >::pri, *var);
+        }
+        else
+        {
+            int ret = fscanf(file, fmttag< T >::scn, var);
+            C4_CHECK(ret == 1);
+        }
+    }
+
+    void pop_var(const char *name)
+    {
+        if(writing)
+        {
+            fprintf(file, "\n");
+        }
+        else
+        {
+            fscanf(file, "\n");
+        }
+        --level;
+    }
+
+    void push_seq(const char *name, size_t num)
+    {
+        push_var(name);
+        if(writing)
+        {
+            fprintf(file, "{%zu [\n", num);
+        }
+        else
+        {
+            int ret;
+            size_t check;
+            ret = fscanf(file, "{%zu [\n", &check);
+            C4_CHECK(ret == 1);
+            C4_CHECK(check == num);
+        }
+    }
+
+    template< class T >
+    void operator() (T *var, size_t num)
+    {
+        if(writing)
+        {
+            for(size_t i = 0; i < num; ++i)
+            {
+                _indentw();
+                fprintf(file, fmttag< T >::pri, *(var + i));
+                fprintf(file, "\n");
+            }
+        }
+        else
+        {
+            for(size_t i = 0; i < num; ++i)
+            {
+                _indentr();
+                int ret;
+                ret = fscanf(file, fmttag< T >::scn, (var + i));
+                C4_CHECK(ret == 1);
+                ret = fscanf(file, "\n");
+            }
+        }
+    }
+
+    void pop_seq(const char *name, size_t num)
+    {
+        if(writing)
+        {
+            fprintf(file, "]}");
+        }
+        else
+        {
+            int ret;
+            ret = fscanf(file, "]}");
+        }
+        pop_var(name);
+    }
+
+    void _indentw()
+    {
+        C4_ASSERT(writing);
+        for(int i = 0; i < level; ++i)
+            fprintf(file, "  ");
+    }
+    void _indentr()
+    {
+        C4_ASSERT(!writing);
+        int ret;
+        for(int i = 0; i < level; ++i)
+            ret = fscanf(file, "  ");
+        (void)ret; // prevent unused warning
+    }
+};
 
 } // end namespace c4
 
