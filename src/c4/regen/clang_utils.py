@@ -253,8 +253,8 @@ def get_token_cursor(token, trans_unit):
 
 
 def find_enclosing_class_node(node):
-    #n = find_node_with_offset(node, 0, -1) # TODO: HACK.......
-    n = node.semantic_parent
+    n = find_node_with_offset(node, 0, -1) # TODO: HACK.......
+    #n = node.semantic_parent
     return n
 
 

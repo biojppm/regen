@@ -339,7 +339,7 @@ class Enum(CodeEntity):
             return self._ctx
         cn = self.class_name + "::" if self.class_name else ""
         enccn = (self.enclosing_class_name + "::") if self.enclosing_class_name else ""
-        print(enccn)
+        #print(enccn)
         ename = enccn + self.enum_name
         self._ctx = {
             'enum':{
@@ -637,7 +637,10 @@ class ChunkWriterGenFile:
             'src_name': source_file.name_src,
             'hdr_name_gen': source_file.name_hdr_gen,
             'inc_guard': inc_guard(source_file.name_hdr),
-            'inc_guard_gen': inc_guard(source_file.name_hdr_gen)
+            'inc_guard_gen': inc_guard(source_file.name_hdr_gen),
+            'include_header': ('#include "{}"'.format(source_file.name_hdr)
+                               if os.path.exists(source_file.name_hdr)
+                               else ''),
         }
         if hdr: hdr = tpl_env.from_string(c.tpl_hdr).render(ctx)
         if src: src = tpl_env.from_string(c.tpl_src).render(ctx)
@@ -661,7 +664,7 @@ class ChunkWriterGenFile:
 #ifndef {{inc_guard_gen}}
 #define {{inc_guard_gen}}
 
-#include "{{hdr_name}}"
+{{include_header}}
 
 {{hdr}}
 {{inl}}

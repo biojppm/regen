@@ -2,6 +2,7 @@
 #include <cstdlib>
 
 #include "reflect.hpp"
+#include <stdint.h>
 
 C4_ENUM()
 typedef enum {
@@ -57,7 +58,7 @@ struct TestTpl4
     U y[N];
     V z[N];
 };
-template< class T, class U, class V, int N, template< class > AAA >
+template< class T, class U, class V, int N, template< class > class AAA >
 struct TestTpl51
 {
     C4_CLASS()
@@ -66,7 +67,7 @@ struct TestTpl51
     V z[N];
     AAA< T > w;
 };
-template< class T, class U, class V, int N, template< class, class > AAA >
+template< class T, class U, class V, int N, template< class, class > class AAA >
 struct TestTpl52
 {
     C4_CLASS()
@@ -75,7 +76,7 @@ struct TestTpl52
     V z[N];
     AAA< T, U > w;
 };
-template< class T, class U, class V, int N, template< class, class, class > AAA >
+template< class T, class U, class V, int N, template< class, class, class > class AAA >
 struct TestTpl53
 {
     C4_CLASS()
@@ -84,7 +85,7 @@ struct TestTpl53
     V z[N];
     AAA< T, U, V > w;
 };
-template< class T, class U, class V, int N, template< class, class, class, int > AAA >
+template< class T, class U, class V, int N, template< class, class, class, int > class AAA >
 struct TestTpl54
 {
     C4_CLASS()

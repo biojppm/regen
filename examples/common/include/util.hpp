@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+#include <cinttypes>
 
 /* NOTE: using , ## __VA_ARGS__ to deal with zero-args calls to
  * variadic macros is not portable, but works in clang, gcc, msvc, icc.
@@ -68,5 +69,18 @@
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
+//------------------------------------------------------------
+template< class T > struct fmttag;
+template<> struct fmttag<  uint8_t > { static constexpr const char *scn = "%" SCNu8 , *pri = "%" PRIu8 ; };
+template<> struct fmttag< uint16_t > { static constexpr const char *scn = "%" SCNu16, *pri = "%" PRIu16; };
+template<> struct fmttag< uint32_t > { static constexpr const char *scn = "%" SCNu32, *pri = "%" PRIu32; };
+template<> struct fmttag< uint64_t > { static constexpr const char *scn = "%" SCNu64, *pri = "%" PRIu64; };
+template<> struct fmttag<   int8_t > { static constexpr const char *scn = "%" SCNd8 , *pri = "%" PRId8 ; };
+template<> struct fmttag<  int16_t > { static constexpr const char *scn = "%" SCNd16, *pri = "%" PRId16; };
+template<> struct fmttag<  int32_t > { static constexpr const char *scn = "%" SCNd32, *pri = "%" PRId32; };
+template<> struct fmttag<  int64_t > { static constexpr const char *scn = "%" SCNd64, *pri = "%" PRId64; };
+template<> struct fmttag<    float > { static constexpr const char *scn = "%g"      , *pri = "%g"      ; };
+template<> struct fmttag<   double > { static constexpr const char *scn = "%lg"     , *pri = "%lg"     ; };
 
 #endif //_C4_UTIL_HPP_

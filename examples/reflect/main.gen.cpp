@@ -2,132 +2,45 @@
 
 #include "main.gen.hpp"
 
-/** enum: auto-generated from main.cpp:6: C4_ENUM: TestEnum_e */
-template<> const EnumPairs< TestEnum_e > enum_pairs()
-{
-    static const EnumAndName< TestEnum_e > vals[] = {
-        { TE_0, "TE_0"},
-        { TE_1, "TE_1"},
-        { TE_2, "TE_2"},
-    };
-    EnumPairs< TestEnum_e > r(vals);
-    return r;
-}
-/** enum: auto-generated from main.cpp:13: C4_ENUM: TestEnumClass_e */
-template<> const EnumPairs< TestEnumClass_e > enum_pairs()
-{
-    static const EnumAndName< TestEnumClass_e > vals[] = {
-        { TestEnumClass_e::TEC_0, "TestEnumClass_e::TEC_0"},
-        { TestEnumClass_e::TEC_1, "TestEnumClass_e::TEC_1"},
-        { TestEnumClass_e::TEC_2, "TestEnumClass_e::TEC_2"},
-        { TestEnumClass_e::TEC_3, "TestEnumClass_e::TEC_3"},
-        { TestEnumClass_e::TEC_4, "TestEnumClass_e::TEC_4"},
-        { TestEnumClass_e::TEC_5, "TestEnumClass_e::TEC_5"},
-        { TestEnumClass_e::TEC_6, "TestEnumClass_e::TEC_6"},
-        { TestEnumClass_e::TEC_7, "TestEnumClass_e::TEC_7"},
-        { TestEnumClass_e::TEC_8, "TestEnumClass_e::TEC_8"},
-    };
-    EnumPairs< TestEnumClass_e > r(vals);
-    return r;
-}
-/** serialize: auto-generated from main.cpp:28: C4_CLASS: TestStruct */
-template<>
-void serialize< TestStruct >(Archive &a, const char *name, TestStruct *var)
-{
-    serialize< float >(a, "x", &var->x);
-    serialize< float >(a, "y", &var->y);
-    serialize< float >(a, "z", &var->z);
-}
-/** serialize: auto-generated from main.cpp:34: C4_CLASS: TestTpl<T> */
-template<class T>
-void serialize< TestTpl<T> >(Archive &a, const char *name, TestTpl<T> *var)
-{
-    serialize< T >(a, "r", &var->r);
-    serialize< T >(a, "g", &var->g);
-    serialize< T >(a, "b", &var->b);
-    serialize< T >(a, "a", &var->a);
-}
-/** serialize: auto-generated from main.cpp:40: C4_CLASS: TestTpl2<T, U> */
-template<class T, class U>
-void serialize< TestTpl2<T, U> >(Archive &a, const char *name, TestTpl2<T, U> *var)
-{
-    serialize< T >(a, "x", &var->x);
-    serialize< U >(a, "y", &var->y);
-}
-/** serialize: auto-generated from main.cpp:47: C4_CLASS: TestTpl3<T, U, V> */
-template<class T, class U, class V>
-void serialize< TestTpl3<T, U, V> >(Archive &a, const char *name, TestTpl3<T, U, V> *var)
-{
-    serialize< T >(a, "x", &var->x);
-    serialize< U >(a, "y", &var->y);
-    serialize< V >(a, "z", &var->z);
-}
-/** serialize: auto-generated from main.cpp:55: C4_CLASS: TestTpl4<T, U, V, N> */
-template<class T, class U, class V, int N>
-void serialize< TestTpl4<T, U, V, N> >(Archive &a, const char *name, TestTpl4<T, U, V, N> *var)
-{
-    serialize< T [N] >(a, "x", &var->x);
-    serialize< U [N] >(a, "y", &var->y);
-    serialize< V [N] >(a, "z", &var->z);
-}
-/** serialize: auto-generated from main.cpp:63: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
-template<class T, class U, class V, int N, template<class> AAA>
-void serialize< TestTpl51<T, U, V, N, AAA> >(Archive &a, const char *name, TestTpl51<T, U, V, N, AAA> *var)
-{
-    serialize< T [N] >(a, "x", &var->x);
-    serialize< U [N] >(a, "y", &var->y);
-    serialize< V [N] >(a, "z", &var->z);
-    serialize< AAA<T> >(a, "w", &var->w);
-}
-/** serialize: auto-generated from main.cpp:72: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
-template<class T, class U, class V, int N, template<class, class> AAA>
-void serialize< TestTpl52<T, U, V, N, AAA> >(Archive &a, const char *name, TestTpl52<T, U, V, N, AAA> *var)
-{
-    serialize< T [N] >(a, "x", &var->x);
-    serialize< U [N] >(a, "y", &var->y);
-    serialize< V [N] >(a, "z", &var->z);
-    serialize< AAA<T, U> >(a, "w", &var->w);
-}
-/** serialize: auto-generated from main.cpp:81: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
-template<class T, class U, class V, int N, template<class, class, class> AAA>
-void serialize< TestTpl53<T, U, V, N, AAA> >(Archive &a, const char *name, TestTpl53<T, U, V, N, AAA> *var)
-{
-    serialize< T [N] >(a, "x", &var->x);
-    serialize< U [N] >(a, "y", &var->y);
-    serialize< V [N] >(a, "z", &var->z);
-    serialize< AAA<T, U, V> >(a, "w", &var->w);
-}
-/** serialize: auto-generated from main.cpp:90: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
-template<class T, class U, class V, int N, template<class, class, class, int> AAA>
-void serialize< TestTpl54<T, U, V, N, AAA> >(Archive &a, const char *name, TestTpl54<T, U, V, N, AAA> *var)
-{
-    serialize< T [N] >(a, "x", &var->x);
-    serialize< U [N] >(a, "y", &var->y);
-    serialize< V [N] >(a, "z", &var->z);
-    serialize< AAA<T, U, V, N> >(a, "w", &var->w);
-}
-/** serialize: auto-generated from main.cpp:99: C4_CLASS: ThisIsATest */
-template<>
-void serialize< ThisIsATest >(Archive &a, const char *name, ThisIsATest *var)
-{
-    serialize< bool >(a, "bdata", &var->bdata);
-    serialize< char >(a, "mode_data", &var->mode_data);
-    serialize< int >(a, "prop", &var->prop);
-    serialize< int >(a, "prop2", &var->prop2);
-    serialize< float >(a, "more_data", &var->more_data);
-    serialize< double >(a, "yet_more_data", &var->yet_more_data);
-    serialize< TestEnum_e >(a, "ste", &var->ste);
-    serialize< TestStruct >(a, "ts", &var->ts);
-    serialize< int >(a, "ttpl", &var->ttpl);
-}
-/** enum: auto-generated from main.cpp:102: C4_ENUM: ThisIsATest::TTestEnum_e */
-template<> const EnumPairs< ThisIsATest::TTestEnum_e > enum_pairs()
-{
-    static const EnumAndName< ThisIsATest::TTestEnum_e > vals[] = {
-        { CE_0, "CE_0"},
-        { CE_1, "CE_1"},
-        { CE_2, "CE_2"},
-    };
-    EnumPairs< ThisIsATest::TTestEnum_e > r(vals);
-    return r;
-}
+
+
+/** serialize: auto-generated from main.cpp:29: C4_CLASS: TestStruct */
+// TestStruct
+/** imgui: auto-generated from main.cpp:29: C4_CLASS: TestStruct */
+// TestStruct
+/** serialize: auto-generated from main.cpp:35: C4_CLASS: TestTpl<T> */
+// TestTpl<T>
+/** imgui: auto-generated from main.cpp:35: C4_CLASS: TestTpl<T> */
+// TestTpl<T>
+/** serialize: auto-generated from main.cpp:41: C4_CLASS: TestTpl2<T, U> */
+// TestTpl2<T, U>
+/** imgui: auto-generated from main.cpp:41: C4_CLASS: TestTpl2<T, U> */
+// TestTpl2<T, U>
+/** serialize: auto-generated from main.cpp:48: C4_CLASS: TestTpl3<T, U, V> */
+// TestTpl3<T, U, V>
+/** imgui: auto-generated from main.cpp:48: C4_CLASS: TestTpl3<T, U, V> */
+// TestTpl3<T, U, V>
+/** serialize: auto-generated from main.cpp:56: C4_CLASS: TestTpl4<T, U, V, N> */
+// TestTpl4<T, U, V, N>
+/** imgui: auto-generated from main.cpp:56: C4_CLASS: TestTpl4<T, U, V, N> */
+// TestTpl4<T, U, V, N>
+/** serialize: auto-generated from main.cpp:64: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
+// TestTpl51<T, U, V, N, AAA>
+/** imgui: auto-generated from main.cpp:64: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
+// TestTpl51<T, U, V, N, AAA>
+/** serialize: auto-generated from main.cpp:73: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
+// TestTpl52<T, U, V, N, AAA>
+/** imgui: auto-generated from main.cpp:73: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
+// TestTpl52<T, U, V, N, AAA>
+/** serialize: auto-generated from main.cpp:82: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
+// TestTpl53<T, U, V, N, AAA>
+/** imgui: auto-generated from main.cpp:82: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
+// TestTpl53<T, U, V, N, AAA>
+/** serialize: auto-generated from main.cpp:91: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
+// TestTpl54<T, U, V, N, AAA>
+/** imgui: auto-generated from main.cpp:91: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
+// TestTpl54<T, U, V, N, AAA>
+/** serialize: auto-generated from main.cpp:100: C4_CLASS: ThisIsATest */
+// ThisIsATest
+/** imgui: auto-generated from main.cpp:100: C4_CLASS: ThisIsATest */
+// ThisIsATest

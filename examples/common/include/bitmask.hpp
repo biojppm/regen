@@ -1,7 +1,6 @@
 #ifndef _C4_BITMASK_HPP_
 #define _C4_BITMASK_HPP_
 
-#include <cinttypes>
 #include <cstring>
 #include <type_traits>
 
@@ -146,18 +145,6 @@ bm2str
 
 
 //-----------------------------------------------------------------------------
-
-namespace detail {
-template< class I > struct scanftag;
-template<> struct scanftag< uint8_t  > { static constexpr const char *tag = "%" SCNu8 ; };
-template<> struct scanftag< uint16_t > { static constexpr const char *tag = "%" SCNu16; };
-template<> struct scanftag< uint32_t > { static constexpr const char *tag = "%" SCNu32; };
-template<> struct scanftag< uint64_t > { static constexpr const char *tag = "%" SCNu64; };
-template<> struct scanftag<  int8_t  > { static constexpr const char *tag = "%" SCNd8 ; };
-template<> struct scanftag<  int16_t > { static constexpr const char *tag = "%" SCNd16; };
-template<> struct scanftag<  int32_t > { static constexpr const char *tag = "%" SCNd32; };
-template<> struct scanftag<  int64_t > { static constexpr const char *tag = "%" SCNd64; };
-} // end namespace detail
 
 /** convert a string to a bitmask */
 template< class E >
