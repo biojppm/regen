@@ -1,6 +1,8 @@
 #ifndef _C4_SERIALIZE_HPP_
 #define _C4_SERIALIZE_HPP_
 
+#include <type_traits>
+
 namespace c4 {
 
 // forward declarations
@@ -29,7 +31,7 @@ inline void serialize(Archive< Stream > &a, const char* name, T *var, size_t num
  * CUSTOM_TXT      |      1 * memcpy()        |     N * (c4::serialize())
  *-----------------+--------------------------+---------------------------------
  */
-enum class SerializeCategory_e
+enum class SerializeCategory_e : int
 {
     /** for fundamental types, pod types, and C-style arrays thereof.
      * eg: int, int[], int[N], float, double, pod structs, etc */
@@ -41,14 +43,14 @@ enum class SerializeCategory_e
      * @todo implement this*/
     // CUSTOM_TXT,
 
-    inline operator int () const { return static_cast< int >(*this); }
-    inline bool operator== (int v) const { return static_cast< SerializeCategory_e >(v) == *this; }
+    //inline operator int () const { return static_cast< int >(*this); }
+    //inline bool operator== (int v) const { return static_cast< SerializeCategory_e >(v) == *this; }
 };
 
 template< class T >
 struct serialize_category
 {
-    enum : int { value = SerializeCategory_e::NATIVE };
+    enum : int { value = (int)SerializeCategory_e::NATIVE };
 };
 /** makes C-style arrays use their type without extent */
 template< class T >
@@ -74,7 +76,9 @@ struct serialize_category< T[N] >
         serialize_category< T >::value                                  \
         ==                                                              \
         (int)SerializeCategory_e::category_                             \
-    >::type_
+        ,                                                               \
+        type_                                                           \
+    >::type
 
 template< class Stream >
 class Archive
@@ -94,16 +98,16 @@ public:
     template< class T >
     _c4sfinae(void, NATIVE) operator()(const char* name, T *var)
     {
-        push_var(name);
+        push(name);
         m_stream(var);
-        pop_var(name);
+        pop(name);
     }
     template< class T >
     _c4sfinae(void, CUSTOM) operator()(const char* name, T *var)
     {
-        push_var(name);
-        c4::serialize(*this, name, var);
-        pop_var(name);
+        push(name);
+        serialize(*this, name, var);
+        pop(name);
     }
 
     template< class T >
@@ -119,7 +123,7 @@ public:
         push_seq(name, num);
         for(size_t i = 0; i < num; ++i)
         {
-            c4::serialize(*this, name, var + i);
+            serialize(*this, name, var + i);
         }
         pop_seq(name, num);
     }
@@ -156,17 +160,17 @@ struct srlz_custom
     {
         a(name, var, num);
     }
-}
+};
 
 template< class T, class Stream >
 void serialize(Archive< Stream > &a, const char* name, T *var)
 {
-    detail::srlz_custom::s(a, name, var);
+    srlz_custom< T, Stream >::s(a, name, var);
 }
 template< class T, class Stream >
 void serialize(Archive< Stream > &a, const char* name, T *var, size_t num)
 {
-    detail::srlz_custom::s(a, name, var, num);
+    srlz_custom< T, Stream >::s(a, name, var, num);
 }
 
 } // end namespace c4

@@ -329,7 +329,10 @@ class Enum(CodeEntity):
         self.symbols = []
         for c in self.enum_cursor.get_children():
             if c.kind == ck.ENUM_CONSTANT_DECL:
-                self.symbols.append(EnumSymbol(c))
+                es = EnumSymbol(c)
+                if enclosing_class:
+                    es.name = self.enclosing_class_name + "::" + es.name
+                self.symbols.append(es)
 
         self.symbol_prefix = os.path.commonprefix([s.name for s in self.symbols])
 
@@ -458,7 +461,7 @@ class TplParam:
         elif k == ck.TEMPLATE_NON_TYPE_PARAMETER:
             return c.type.spelling + dn
         elif k == ck.TEMPLATE_TEMPLATE_PARAMETER:
-            return "template<" + self.tpl_info.params_string + ">" + dn
+            return "template<" + self.tpl_info.params_string + "> class " + dn
 
 
 # ------------------------------------------------------------------------------
@@ -522,11 +525,23 @@ class BaseGenerator:
         self.hdr = tpl_env.from_string(kwargs.get('hdr', ''))
         self.src = tpl_env.from_string(kwargs.get('src', ''))
         self.inl = tpl_env.from_string(kwargs.get('inl', ''))
+        self.hdr_preamble = tpl_env.from_string(kwargs.get('hdr_preamble', ''))
+        self.src_preamble = tpl_env.from_string(kwargs.get('src_preamble', ''))
+        self.inl_preamble = tpl_env.from_string(kwargs.get('inl_preamble', ''))
 
     def _gen(self, originator, ctx):
         hdr = self.hdr.render(ctx)
         src = self.src.render(ctx)
         inl = self.inl.render(ctx)
+        if hdr and self.hdr_preamble:
+            hdr_preamble = self.hdr_preamble.render(ctx)
+            hdr = '\n{}\n{}'.format(hdr_preamble, hdr)
+        if src and self.src_preamble:
+            src_preamble = self.src_preamble.render(ctx)
+            src = '\n{}\n{}'.format(src_preamble, src)
+        if inl and self.inl_preamble:
+            inl_preamble = self.inl_preamble.render(ctx)
+            inl = '\n{}\n{}'.format(inl_preamble, inl)
         return CodeChunk(self, originator, hdr, src, inl)
 
 
