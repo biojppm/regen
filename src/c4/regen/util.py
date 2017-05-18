@@ -1,6 +1,7 @@
 import sys
+import subprocess
 
-debug_mode = False
+debug_mode = True
 
 
 def logerr(*args, **kwargs):
@@ -10,6 +11,23 @@ def logerr(*args, **kwargs):
 def dbg(*args, **kwargs):
     if debug_mode:
         print(*args, **kwargs, file=sys.stderr)
+
+
+def in_windows():
+    return sys.platform == "win32"
+
+
+def in_unix():
+    return sys.platform in ("linux", "linux2", "darwin")
+
+
+def get_output(cmd):
+    status, output = subprocess.getstatusoutput(cmd)
+    if status != 0:
+        msg = "command failed with status {}: {}\noutput was:\n{}"
+        msg = msg.format(status, cmd, output)
+        raise Exception(msg)
+    return output
 
 
 def cacheattr(obj, name, function):
