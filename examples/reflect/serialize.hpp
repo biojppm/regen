@@ -247,11 +247,11 @@ struct ArchiveStreamText
     {
         if(writing)
         {
-            fprintf(file, fmttag< T >::pri, *var);
+            fprintc(file, *var);
         }
         else
         {
-            int ret = fscanf(file, fmttag< T >::scn, var);
+            int ret = fscanc(file, var);
             C4_CHECK(ret == 1);
         }
     }
@@ -294,7 +294,7 @@ struct ArchiveStreamText
             for(size_t i = 0; i < num; ++i)
             {
                 _indentw();
-                fprintf(file, fmttag< T >::pri, *(var + i));
+                fprintc(file, *(var + i));
                 fprintf(file, "\n");
             }
         }
@@ -304,7 +304,7 @@ struct ArchiveStreamText
             {
                 _indentr();
                 int ret;
-                ret = fscanf(file, fmttag< T >::scn, (var + i));
+                ret = fscanc(file, (var + i));
                 C4_CHECK(ret == 1);
                 ret = fscanf(file, "\n");
             }
