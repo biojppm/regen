@@ -17,28 +17,31 @@ template< class Stream > class Archive;
 template< class T, class Stream > void serialize(Archive< Stream > &a, const char* name, T *var);
 template< class T, class Stream > void serialize(Archive< Stream > &a, const char* name, T *var, size_t num);
 
+
+//-----------------------------------------------------------------------------
+
 #define C4_DECLARE_SERIALIZE_METHOD()                               \
-    public:                                                         \
+public:                                                             \
     template< class Stream >                                        \
-        void serialize(c4::Archive< Stream > &a, const char* name); \
-    private:
+    void serialize(c4::Archive< Stream > &a, const char* name);     \
+private:
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
 /** @see serialize_category<>
- *------------------------------------------------------------------------------
+ *-----------------------------------------------------------------------------
  *    to serialize:                     N objects
- *--------------------------------------------+---------------------------------
- *      in format: |         binary           |       text(yml,xml,json)
- *-----------------+--------------------------+---------------------------------
- * NATIVE          |      1 * memcpy()        |  N * (operator>> or operator<<)
- *-----------------+--------------------------+---------------------------------
- * CUSTOM          |   N * (c4::serialize())  |     N * (c4::serialize())
- *-----------------+--------------------------+---------------------------------
- * CUSTOM_METHOD   |   N * (var->serialize()) |     N * (var->serialize())
- *-----------------+--------------------------+---------------------------------
+ *-------------------------------------------+---------------------------------
+ *      in format: |        binary           |       text(yml,xml,json)
+ *-----------------+-------------------------+---------------------------------
+ * NATIVE          |     1 * memcpy()        |  N * (operator>> or operator<<)
+ *-----------------+-------------------------+---------------------------------
+ * CUSTOM          |  N * (c4::serialize())  |     N * (c4::serialize())
+ *-----------------+-------------------------+---------------------------------
+ * METHOD          |  N * (var->serialize()) |     N * (var->serialize())
+ *-----------------+-------------------------+---------------------------------
  */
 enum class SerializeCategory_e : int
 {
@@ -75,7 +78,6 @@ struct serialize_category< T[N] >
     enum : int { value = serialize_category< T >::value };
 };
 
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -95,15 +97,14 @@ class Archive
 {
 public:
 
-    typedef enum {
-        READ = 0,
-        WRITE = 1,
-    } ArchiveMode_e;
+    template< class... Args >
+    void write_mode(bool yes, Args&&... args)
+    {
+        m_stream.write_mode(yes, std::forward< Args >(args)...);
+    }
+    bool write_mode() const { return m_stream.write_mode(); }
 
 public:
-
-    bool is_reading() const { return m_mode == READ; }
-    bool is_writing() const { return m_mode == WRITE; }
 
     template< class T >
     _c4sfinae(void, NATIVE) operator()(const char* name, T *var)
@@ -125,6 +126,12 @@ public:
         push(name);
         var->serialize(*this, name);
         pop(name);
+    }
+
+    template< class T, size_t N >
+    void operator()(const char *name, T (*var)[N])
+    {
+        (*this)(name, *var, N);
     }
 
     template< class T >
@@ -160,15 +167,7 @@ public:
     void push_seq(const char* name, size_t num) { m_stream.push_seq(name, num); }
     void pop_seq(const char* name, size_t num) { m_stream.pop_seq(name, num); }
 
-    template< class... Args >
-    void write_mode(bool yes, Args&&... args)
-    {
-        m_stream.write_mode(yes, std::forward< Args >(args)...);
-    }
-
-public:
-
-    ArchiveMode_e m_mode;
+private:
 
     Stream m_stream;
 
@@ -192,6 +191,11 @@ void serialize(Archive< Stream > &a, const char* name, T *var, size_t num)
 {
     a(name, var, num);
 }
+template< class T, size_t N, class Stream >
+void serialize(Archive< Stream > &a, const char* name, T (*var)[N])
+{
+    a(name, var, N);
+}
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -206,6 +210,7 @@ struct ArchiveStreamText
     std::vector< char > name_check;
 #endif
 
+    bool write_mode() const { return writing; }
     void write_mode(bool yes, FILE *which = nullptr)
     {
         if(yes)
@@ -232,7 +237,6 @@ struct ArchiveStreamText
             _indentr();
             int len, conv;
             conv = fscanf(file, "%*s%n ", &len);
-            //C4_CHECK(conv == 1);
             C4_CHECK(len == strlen(name));
         }
         ++level;
@@ -320,6 +324,8 @@ struct ArchiveStreamText
         }
         pop_var(name);
     }
+
+private:
 
     void _indentw()
     {
