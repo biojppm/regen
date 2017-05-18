@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
         FILE *output = fopen("archive.txt", "w");
         a.write_mode(true, output);
         a("i", &i);
-        a("arr", arr, N);
+        a("arr", &arr);
         a("ts1", &ts1);
         fclose(output);
     }
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     {
         a.write_mode(true);
         a("i", &ic);
-        a("arr", arrc, N);
+        a("arr", &arrc);
         a("ts2", &ts2);
     }
 
@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
         FILE *input = fopen("archive.txt", "r");
         a.write_mode(false, input);
         a("i", &ic);
-        a("arr", arrc, N);
+        a("arr", &arrc);
         a("ts1", &ts2);
         fclose(input);
     }
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     {
         a.write_mode(true);
         a("i", &ic);
-        a("arr", arrc, N);
+        a("arr", &arrc);
         a("ts2", &ts2);
     }
 
