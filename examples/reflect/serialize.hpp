@@ -238,6 +238,12 @@ struct ArchiveStreamText
             int len;
             fscanf(file, "%*s%n ", &len);
             C4_CHECK(len == (int)strlen(name));
+#ifdef C4_DEBUG
+            name_check.resize(len + 1);
+            fscanf(file, "%s", &name_check.data());
+            C4_CHECK_MSG(strcmp(name_check.data(), name) == 0,
+                         "expected %s got %s", name, name_check.data());
+#endif
         }
         ++level;
     }
@@ -337,6 +343,81 @@ private:
         C4_ASSERT(!writing);
         for(int i = 0; i < level; ++i)
             fscanf(file, "  ");
+    }
+
+};
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+struct ArchiveStreamBinary
+{
+
+    bool writing = true;
+    FILE* file = nullptr;
+#ifdef C4_DEBUG
+    std::vector< char > name_check;
+#endif
+
+    bool write_mode() const { return writing; }
+    void write_mode(bool yes, FILE *which = nullptr)
+    {
+        if(yes)
+        {
+            writing = true;
+            file = which ? which : stdout;
+        }
+        else
+        {
+            writing = false;
+            file = which ? which : stdin;
+        }
+    }
+
+    void push_var(const char *name)
+    {
+    }
+
+    template< class T >
+    void operator() (T *var)
+    {
+        size_t numb = sizeof(T);
+        if(writing)
+        {
+            fwrite(var, 1, numb, file);
+        }
+        else
+        {
+            size_t ret = fread(var, 1, numb, file);
+            C4_CHECK(ret == numb);
+        }
+    }
+
+    void pop_var(const char *name)
+    {
+    }
+
+    void push_seq(const char *name, size_t num)
+    {
+    }
+
+    template< class T >
+    void operator() (T *var, size_t num)
+    {
+        size_t numb = num * sizeof(T);
+        if(writing)
+        {
+            fwrite(var, 1, numb, file);
+        }
+        else
+        {
+            size_t ret = fread(var, 1, numb, file);
+            C4_CHECK(ret == numb);
+        }
+    }
+
+    void pop_seq(const char *name, size_t num)
+    {
     }
 
 };

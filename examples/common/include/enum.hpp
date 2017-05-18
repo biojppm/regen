@@ -78,7 +78,7 @@ EnumSymbols< T > const esyms();
  * eoffs_cls< MyEnumClass >() would be 13=strlen("MyEnumClass::").
  *
  * With this function you can announce that the full prefix (including an
- * eventual enclosing class or C++11 enum class plus the string prefix) is of
+ * eventual enclosing class or C++11 enum class) is of
  * a certain length.
  *
  * @warning Needs to be specialized for each enum class type that wants to
