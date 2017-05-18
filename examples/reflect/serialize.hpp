@@ -235,9 +235,9 @@ struct ArchiveStreamText
         else
         {
             _indentr();
-            int len, conv;
-            conv = fscanf(file, "%*s%n ", &len);
-            C4_CHECK(len == strlen(name));
+            int len;
+            fscanf(file, "%*s%n ", &len);
+            C4_CHECK(len == (int)strlen(name));
         }
         ++level;
     }
@@ -319,8 +319,7 @@ struct ArchiveStreamText
         }
         else
         {
-            int ret;
-            ret = fscanf(file, "]}");
+            fscanf(file, "]}");
         }
         pop_var(name);
     }
@@ -336,11 +335,10 @@ private:
     void _indentr()
     {
         C4_ASSERT(!writing);
-        int ret;
         for(int i = 0; i < level; ++i)
-            ret = fscanf(file, "  ");
-        (void)ret; // prevent unused warning
+            fscanf(file, "  ");
     }
+
 };
 
 } // end namespace c4

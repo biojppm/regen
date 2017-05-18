@@ -119,7 +119,7 @@ size_t eoffs(EnumOffsetType which)
         return pfx > 0 ? pfx : eoffs_cls< T >();
     }
     default:
-        C4_ERROR("unknown offset type");
+        C4_ERROR("unknown offset type %d", (int)which);
         return 0;
     }
 }

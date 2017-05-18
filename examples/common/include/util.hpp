@@ -24,6 +24,11 @@
 //------------------------------------------------------------
 // error reporting
 
+#define C4_ERROR_NO_ARGS(msg)                                           \
+    {                                                                   \
+        C4_LOG("\n%s:%d: ERROR: " msg "\nABORTING...\n", __FILE__, __LINE__); \
+        std::abort();                                                   \
+    }
 #define C4_ERROR(msg, ...)                                              \
     {                                                                   \
         C4_LOG("\n%s:%d: ERROR: " msg "\nABORTING...\n", __FILE__, __LINE__, ## __VA_ARGS__); \
@@ -37,7 +42,7 @@
 #define C4_CHECK(cond) \
     if(!(cond))\
     {\
-        C4_ERROR("check failed: " #cond);\
+        C4_ERROR_NO_ARGS("check failed: " #cond);\
     }
 /** like C4_CHECK(), and additionally log a printf-style message.
  * @see C4_CHECK */
@@ -80,7 +85,21 @@ template<> struct fmttag<   int8_t > { static constexpr const char *scn = "%" SC
 template<> struct fmttag<  int16_t > { static constexpr const char *scn = "%" SCNd16, *pri = "%" PRId16; };
 template<> struct fmttag<  int32_t > { static constexpr const char *scn = "%" SCNd32, *pri = "%" PRId32; };
 template<> struct fmttag<  int64_t > { static constexpr const char *scn = "%" SCNd64, *pri = "%" PRId64; };
+// floating points... see http://stackoverflow.com/questions/4643641/best-way-to-output-a-full-precision-double-into-a-text-file
 template<> struct fmttag<    float > { static constexpr const char *scn = "%g"      , *pri = "%g"      ; };
 template<> struct fmttag<   double > { static constexpr const char *scn = "%lg"     , *pri = "%lg"     ; };
+
+
+template< class T > int fprintc(FILE *file, T const& var) { return fprintf(file, fmttag< T >::pri, var); }
+template< class T > int fscanc (FILE *file, T      * var) { return fscanf (file, fmttag< T >::scn, var); }
+
+template< class T > int printc(T const& var) { return printf(stdout, fmttag< T >::pri, var); }
+template< class T > int scanc (T      * var) { return scanf (stdin , fmttag< T >::scn, var); }
+
+template< class T > int sprintc(const char *str, T const& var) { return sprintf(str, fmttag< T >::pri, var); }
+template< class T > int sscanc (const char *str, T      * var) { return scanf  (str, fmttag< T >::scn, var); }
+
+template< class T > int snprintc(const char *str, size_t sz, T const& var) { return snprintf(str, sz, fmttag< T >::pri, var); }
+// there is no snscanf
 
 #endif //_C4_UTIL_HPP_

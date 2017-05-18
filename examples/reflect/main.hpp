@@ -27,16 +27,16 @@ enum class TestEnumClass_e {
 
 struct TestStruct
 {
-    C4_CLASS();
+    C4_CLASS()
     float x, y, z;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T >
 struct TestTpl
 {
     C4_CLASS()
     T r, g, b, a;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U >
 struct TestTpl2
@@ -44,7 +44,7 @@ struct TestTpl2
     C4_CLASS()
     T x;
     U y;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V >
 struct TestTpl3
@@ -53,7 +53,7 @@ struct TestTpl3
     T x;
     U y;
     V z;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V, int N >
 struct TestTpl4
@@ -62,7 +62,7 @@ struct TestTpl4
     T x[N];
     U y[N];
     V z[N];
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V, int N, template< class > class AAA >
 struct TestTpl51
@@ -72,7 +72,7 @@ struct TestTpl51
     U y[N];
     V z[N];
     AAA< T > w;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V, int N, template< class, class > class AAA >
 struct TestTpl52
@@ -82,7 +82,7 @@ struct TestTpl52
     U y[N];
     V z[N];
     AAA< T, U > w;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V, int N, template< class, class, class > class AAA >
 struct TestTpl53
@@ -92,7 +92,7 @@ struct TestTpl53
     U y[N];
     V z[N];
     AAA< T, U, V > w;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 template< class T, class U, class V, int N, template< class, class, class, int > class AAA >
 struct TestTpl54
@@ -102,7 +102,7 @@ struct TestTpl54
     U y[N];
     V z[N];
     AAA< T, U, V, N > w;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 
 class ThisIsATest
@@ -134,7 +134,7 @@ private:
 
     TestStruct ts;
     TestTpl< uint32_t > ttpl;
-    C4_DECLARE_SERIALIZE_METHOD();
+    C4_DECLARE_SERIALIZE_METHOD()
 };
 
 #endif /* _MAIN_HPP_ */
