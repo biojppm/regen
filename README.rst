@@ -139,7 +139,6 @@ pip along with its dependencies::
 
 From source
 ^^^^^^^^^^^
-
 .. code:: bash
 
     git clone https://github.com/biojppm/regen.git
@@ -148,6 +147,18 @@ From source
 
 For development
 ^^^^^^^^^^^^^^^
+
+.. warning::
+    For easier understanding (and less development work),
+    the examples rely extensively on symbolic link files. This works as
+    expected in Unix and Mac, but symbolic links were only recently
+    introduced in Windows. Git already allows you to use symbolic links
+    in Windows, but the process is convoluted. You must first `enable
+    symlinks in windows
+    <https://github.com/git-for-windows/git/wiki/Symbolic-Links>`_, and you
+    need to pass an option to clone, such that the files are really
+    symbolic links. The clone command thus needs to be ``git clone -c core.symlinks=true https://github.com/biojppm/regen.git``.
+
 Setting up regen for development is easy:
 
 .. code:: bash
