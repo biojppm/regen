@@ -227,13 +227,17 @@ class Class(CodeEntity):
         self.class_cursor = clu.find_enclosing_class_node(annotation_cursor)
         super().__init__(self.class_cursor)
         self.name = self.class_cursor.displayname
+        self.name_without_template_params = self.name
         self.is_template = False
         self.tpl_info = None
         self.tpl_params = ""
+        self.tpl_param_names = ""
         if clu.is_template(self.class_cursor):
             self.is_template = True
             self.tpl_info = TplInfo(self.class_cursor)
             self.tpl_params = self.tpl_info.params_string
+            self.tpl_param_names = self.tpl_info.param_names
+            self.name_without_template_params = re.sub(r'<.*', r'', self.name)
         self.props = []
         self.members = []
         for tk in self.class_cursor.get_tokens():
@@ -258,25 +262,26 @@ class Class(CodeEntity):
         #print(self)#, self.props, self.members)
         self.ctx = self._ctx()
 
-
     def _ctx(self):
-        c = self
         ctx = {
-            'type':self.name,
-            'tpl_params':self.tpl_params,
-            'members':[],
-            'props':[],
+            'type': self.name,
+            'is_tpl': self.is_template,
+            'tpl_params': self.tpl_params,
+            'tpl_param_names': self.tpl_param_names,
+            'type_without_tpl_params': self.name_without_template_params,
+            'members': [],
+            'props': [],
         }
         for p in self.props:
             d = {
-                'type':p.type_name,
-                'name':p.name
+                'type': p.type_name,
+                'name': p.name
             }
             ctx['props'].append(d)
         for m in self.members:
             d = {
-                'type':m.type_name,
-                'name':m.name
+                'type': m.type_name,
+                'name': m.name
             }
             ctx['members'].append(d)
         return ctx
@@ -438,11 +443,13 @@ class TplInfo:
         for n in clu.find_template_parameters(cursor):
             p = TplParam(n)
             self.params.append(p)
-        s = ""
+        self.params_string = ""
+        self.param_names = ""
         for p in self.params:
-            s += ", " if len(s) > 0 else ""
-            s += str(p)
-        self.params_string = s
+            self.param_names += ", " if len(self.param_names) > 0 else ""
+            self.param_names += str(p.name)
+            self.params_string += ", " if len(self.params_string) > 0 else ""
+            self.params_string += str(p.name_with_token)
 
 
 # -----------------------------------------------------------------------------
@@ -455,17 +462,19 @@ class TplParam:
         self.tpl_info = None
         if self.cursor.kind == ck.TEMPLATE_TEMPLATE_PARAMETER:
             self.tpl_info = TplInfo(self.cursor)
-
-    def __str__(self):
         c = self.cursor
         k = c.kind
         dn = (" " + c.displayname) if c.displayname else ""
+        self.name = c.displayname
         if k == ck.TEMPLATE_TYPE_PARAMETER:
-            return "class" + dn
+            self.name_with_token = "class" + dn
         elif k == ck.TEMPLATE_NON_TYPE_PARAMETER:
-            return c.type.spelling + dn
+            self.name_with_token = c.type.spelling + dn
         elif k == ck.TEMPLATE_TEMPLATE_PARAMETER:
-            return "template<" + self.tpl_info.params_string + "> class " + dn
+            self.name_with_token = "template<" + self.tpl_info.params_string + "> class " + dn
+
+    def __str__(self):
+        return self.name_with_token
 
 
 # ------------------------------------------------------------------------------
