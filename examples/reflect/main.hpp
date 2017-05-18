@@ -134,6 +134,7 @@ private:
 
     TestStruct ts;
     TestTpl< uint32_t > ttpl;
+
     C4_DECLARE_SERIALIZE_METHOD()
 };
 
