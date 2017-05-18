@@ -8,8 +8,10 @@ import tempfile
 import ccsyspath
 from shutil import which
 import sys
+import re
 
-from .util import logerr, dbg, cacheattr
+from . import util
+from .util import logerr, dbg, cacheattr, get_output
 
 clang_version = "3.8"
 clang_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
@@ -21,6 +23,7 @@ clang_options = (TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
+
 def load_clang(libdir=None): #, version=clang_version):
     def _doit(libdir):
         version = clang_version
@@ -31,14 +34,28 @@ def load_clang(libdir=None): #, version=clang_version):
         if libdir is None:
             exe = find_llvm_config(version)
             _dbg("llvm-config=", exe)
+            if exe:
+                libdir = get_output(exe + " --libdir")
             if exe is None:
-                msg = "could not find a suitable llvm-config executable. Searched version {}"
-                raise Exception(msg.format(version))
-            libdir = subprocess.getoutput(exe + " --libdir")
+                _dbg("could not find llvm-config...")
+                if util.in_windows():
+                    # assuming vanilla installation
+                    exe = find_clangxx_exe(version)
+                    if exe is None:
+                        raise Exception("found none of llvm-config and clang++. " +
+                                        "make sure at least one of these can be found in your PATH")
+                    libdir = os.path.dirname(exe)
+                if libdir is None:
+                    msg = ("could not find a suitable clang lib directory." +
+                           "Searched for version {}")
+                    raise Exception(msg.format(version))
             _dbg("libdir=", libdir)
         if libdir is not None:
             clang.cindex.Config.set_library_path(libdir)  # this doesn't work, at least in Ubuntu 16.04 x64
-            libname = "libclang.so"  # FIXME for windows
+            if util.in_windows():
+                libname = "libclang.dll"
+            else:
+                libname = "libclang.so"
             lib = os.path.join(libdir, libname)
             _dbg("lib=", lib)
             if not os.path.exists(lib):
@@ -60,7 +77,7 @@ def find_llvm_config(version=clang_version):
             _dbg("'llvm-config' not found")
         else:
             _dbg("'llvm-config' found:", exe)
-            llvmc_version = subprocess.getoutput(exe + " --version")
+            llvmc_version = get_output(exe + " --version")
             _dbg("'llvm-config' version:", llvmc_version)
             majmin = ".".join(llvmc_version.split(".")[0:2])
             ref = ".".join(version.split(".")[0:2])
@@ -76,17 +93,45 @@ def find_llvm_config(version=clang_version):
         if exe is not None:
             _dbg("found", ver, ":", exe)
         else:
-            _dbg("not found", ver, ":", exe)
+            _dbg("not found:", ver)
         return exe
     return cacheattr(sys.modules[__name__], 'llvm_config', _getit)
+
+
+def find_clangxx_exe(version=clang_version):
+    def _getit(version):
+        def _dbg(*args, **kwargs): dbg("looking for clang++:", *args, **kwargs)
+        llvmc = find_llvm_config(version)
+        if llvmc is not None:
+            bindir = get_output(llvmc + " --bindir")
+            _dbg("result for '" + llvmc + " --bindir':", bindir)
+            clangexe = os.path.join(bindir, 'clang++')
+            _dbg("testing clang++:", clangexe)
+            if os.path.exists(clangexe):
+                _dbg("gotit:", clangexe)
+            return
+        exe = which("clang++")
+        if not exe:
+            _dbg("not found in path")
+            return None
+        _dbg("found it:", exe)
+        fullversion = get_output(exe + " --version")
+        _dbg("fullversion:\n" + fullversion)
+        version = re.sub(r"clang version ([0-9].[0-9]).*", r'\1',
+                         fullversion.split("\n")[0])
+        _dbg("extracted version: '" + version + "'")
+        if version != clang_version:
+            msg = ("found clang++ at {}, but is version {}. " +
+                   "Make sure clang++ version {} is found first in your path.")
+            raise Exception(msg.format(exe, version, clang_version))
+        return exe
+    return cacheattr(sys.modules[__name__], 'clangxx', lambda: _getit(version))
 
 
 def get_inc_path():
     def _getit():
         def _dbg(*args, **kwargs): dbg("clang include path:", *args, **kwargs)
-        llvmc = find_llvm_config()
-        bindir = subprocess.getoutput(llvmc + " --bindir")
-        clangexe = os.path.join(bindir, 'clang++')
+        clangexe = find_clangxx_exe()
         _dbg("clang++:", clangexe)
         if not os.path.exists(clangexe):
             raise Exception("could not find clang++: " + clangexe)
@@ -101,6 +146,9 @@ def get_inc_path():
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 def parse_file(filename, args=[], options=clang_options):
+    """
+    @todo cache the results into files based on the file timestamps + md5
+    """
     ip = get_inc_path()
     dbg("parse_file:", filename, ": args=", args)
     dbg("parse_file:", filename, ": inc_path=", ip)
