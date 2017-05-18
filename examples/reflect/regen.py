@@ -44,18 +44,16 @@ serialize = regen.ClassGenerator(
 namespace c4 {
 template <{{tpl_params}}>
 struct serialize_category< {{type}} >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
-{%if tpl_params %}
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
+{%if is_tpl %}
 template <{{tpl_params}}>
 {% endif %}
 template <class Stream>
-void {{type}}::serialize(c4::Archive< Stream > &a, const char* name)
+void {{type}}::serialize(c4::Archive< Stream > &a, const char *name)
 {
     {% for m in members %}
-    c4::serialize< {{m.type}} >(a, "{{m.name}}", &{{m.name}});
+    c4::serialize< {{m.type}} >(a, "{{m.name}}", &this->{{m.name}});
     {% endfor %}
 }
 """,

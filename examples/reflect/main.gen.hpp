@@ -33,16 +33,14 @@ template<> inline size_t eoffs_pfx< TestEnumClass_e >()
 namespace c4 {
 template <>
 struct serialize_category< TestStruct >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class Stream>
-void TestStruct::serialize(c4::Archive< Stream > &a, const char* name)
+void TestStruct::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< float >(a, "x", &x);
-    c4::serialize< float >(a, "y", &y);
-    c4::serialize< float >(a, "z", &z);
+    c4::serialize< float >(a, "x", &this->x);
+    c4::serialize< float >(a, "y", &this->y);
+    c4::serialize< float >(a, "z", &this->z);
 }
 /** imgui: auto-generated from main.hpp:30: C4_CLASS: TestStruct */
 
@@ -52,18 +50,16 @@ void TestStruct::serialize(c4::Archive< Stream > &a, const char* name)
 namespace c4 {
 template <class T>
 struct serialize_category< TestTpl<T> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T>
 template <class Stream>
-void TestTpl<T>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl<T>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T >(a, "r", &r);
-    c4::serialize< T >(a, "g", &g);
-    c4::serialize< T >(a, "b", &b);
-    c4::serialize< T >(a, "a", &a);
+    c4::serialize< T >(a, "r", &this->r);
+    c4::serialize< T >(a, "g", &this->g);
+    c4::serialize< T >(a, "b", &this->b);
+    c4::serialize< T >(a, "a", &this->a);
 }
 /** imgui: auto-generated from main.hpp:37: C4_CLASS: TestTpl<T> */
 
@@ -73,16 +69,14 @@ void TestTpl<T>::serialize(c4::Archive< Stream > &a, const char* name)
 namespace c4 {
 template <class T, class U>
 struct serialize_category< TestTpl2<T, U> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U>
 template <class Stream>
-void TestTpl2<T, U>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl2<T, U>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T >(a, "x", &x);
-    c4::serialize< U >(a, "y", &y);
+    c4::serialize< T >(a, "x", &this->x);
+    c4::serialize< U >(a, "y", &this->y);
 }
 /** imgui: auto-generated from main.hpp:44: C4_CLASS: TestTpl2<T, U> */
 
@@ -92,17 +86,15 @@ void TestTpl2<T, U>::serialize(c4::Archive< Stream > &a, const char* name)
 namespace c4 {
 template <class T, class U, class V>
 struct serialize_category< TestTpl3<T, U, V> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V>
 template <class Stream>
-void TestTpl3<T, U, V>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl3<T, U, V>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T >(a, "x", &x);
-    c4::serialize< U >(a, "y", &y);
-    c4::serialize< V >(a, "z", &z);
+    c4::serialize< T >(a, "x", &this->x);
+    c4::serialize< U >(a, "y", &this->y);
+    c4::serialize< V >(a, "z", &this->z);
 }
 /** imgui: auto-generated from main.hpp:52: C4_CLASS: TestTpl3<T, U, V> */
 
@@ -112,17 +104,15 @@ void TestTpl3<T, U, V>::serialize(c4::Archive< Stream > &a, const char* name)
 namespace c4 {
 template <class T, class U, class V, int N>
 struct serialize_category< TestTpl4<T, U, V, N> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V, int N>
 template <class Stream>
-void TestTpl4<T, U, V, N>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl4<T, U, V, N>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T [N] >(a, "x", &x);
-    c4::serialize< U [N] >(a, "y", &y);
-    c4::serialize< V [N] >(a, "z", &z);
+    c4::serialize< T [N] >(a, "x", &this->x);
+    c4::serialize< U [N] >(a, "y", &this->y);
+    c4::serialize< V [N] >(a, "z", &this->z);
 }
 /** imgui: auto-generated from main.hpp:61: C4_CLASS: TestTpl4<T, U, V, N> */
 
@@ -132,18 +122,16 @@ void TestTpl4<T, U, V, N>::serialize(c4::Archive< Stream > &a, const char* name)
 namespace c4 {
 template <class T, class U, class V, int N, template<class> class  AAA>
 struct serialize_category< TestTpl51<T, U, V, N, AAA> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V, int N, template<class> class  AAA>
 template <class Stream>
-void TestTpl51<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl51<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T [N] >(a, "x", &x);
-    c4::serialize< U [N] >(a, "y", &y);
-    c4::serialize< V [N] >(a, "z", &z);
-    c4::serialize< AAA<T> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &this->x);
+    c4::serialize< U [N] >(a, "y", &this->y);
+    c4::serialize< V [N] >(a, "z", &this->z);
+    c4::serialize< AAA<T> >(a, "w", &this->w);
 }
 /** imgui: auto-generated from main.hpp:70: C4_CLASS: TestTpl51<T, U, V, N, AAA> */
 
@@ -153,18 +141,16 @@ void TestTpl51<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char*
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class> class  AAA>
 struct serialize_category< TestTpl52<T, U, V, N, AAA> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V, int N, template<class, class> class  AAA>
 template <class Stream>
-void TestTpl52<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl52<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T [N] >(a, "x", &x);
-    c4::serialize< U [N] >(a, "y", &y);
-    c4::serialize< V [N] >(a, "z", &z);
-    c4::serialize< AAA<T, U> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &this->x);
+    c4::serialize< U [N] >(a, "y", &this->y);
+    c4::serialize< V [N] >(a, "z", &this->z);
+    c4::serialize< AAA<T, U> >(a, "w", &this->w);
 }
 /** imgui: auto-generated from main.hpp:80: C4_CLASS: TestTpl52<T, U, V, N, AAA> */
 
@@ -174,18 +160,16 @@ void TestTpl52<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char*
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class, class> class  AAA>
 struct serialize_category< TestTpl53<T, U, V, N, AAA> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V, int N, template<class, class, class> class  AAA>
 template <class Stream>
-void TestTpl53<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl53<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T [N] >(a, "x", &x);
-    c4::serialize< U [N] >(a, "y", &y);
-    c4::serialize< V [N] >(a, "z", &z);
-    c4::serialize< AAA<T, U, V> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &this->x);
+    c4::serialize< U [N] >(a, "y", &this->y);
+    c4::serialize< V [N] >(a, "z", &this->z);
+    c4::serialize< AAA<T, U, V> >(a, "w", &this->w);
 }
 /** imgui: auto-generated from main.hpp:90: C4_CLASS: TestTpl53<T, U, V, N, AAA> */
 
@@ -195,18 +179,16 @@ void TestTpl53<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char*
 namespace c4 {
 template <class T, class U, class V, int N, template<class, class, class, int> class  AAA>
 struct serialize_category< TestTpl54<T, U, V, N, AAA> >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class T, class U, class V, int N, template<class, class, class, int> class  AAA>
 template <class Stream>
-void TestTpl54<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char* name)
+void TestTpl54<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< T [N] >(a, "x", &x);
-    c4::serialize< U [N] >(a, "y", &y);
-    c4::serialize< V [N] >(a, "z", &z);
-    c4::serialize< AAA<T, U, V, N> >(a, "w", &w);
+    c4::serialize< T [N] >(a, "x", &this->x);
+    c4::serialize< U [N] >(a, "y", &this->y);
+    c4::serialize< V [N] >(a, "z", &this->z);
+    c4::serialize< AAA<T, U, V, N> >(a, "w", &this->w);
 }
 /** imgui: auto-generated from main.hpp:100: C4_CLASS: TestTpl54<T, U, V, N, AAA> */
 
@@ -216,22 +198,20 @@ void TestTpl54<T, U, V, N, AAA>::serialize(c4::Archive< Stream > &a, const char*
 namespace c4 {
 template <>
 struct serialize_category< ThisIsATest >
-{
-    enum : int { value = (int)SerializeCategory_e::METHOD };
-};
-} // end namespace c4
+{ enum : int { value = (int)SerializeCategory_e::METHOD }; };
+} // namespace c4
 template <class Stream>
-void ThisIsATest::serialize(c4::Archive< Stream > &a, const char* name)
+void ThisIsATest::serialize(c4::Archive< Stream > &a, const char *name)
 {
-    c4::serialize< bool >(a, "bdata", &bdata);
-    c4::serialize< char >(a, "mode_data", &mode_data);
-    c4::serialize< int >(a, "prop", &prop);
-    c4::serialize< int >(a, "prop2", &prop2);
-    c4::serialize< float >(a, "more_data", &more_data);
-    c4::serialize< double >(a, "yet_more_data", &yet_more_data);
-    c4::serialize< TestEnum_e >(a, "ste", &ste);
-    c4::serialize< TestStruct >(a, "ts", &ts);
-    c4::serialize< TestTpl<uint32_t> >(a, "ttpl", &ttpl);
+    c4::serialize< bool >(a, "bdata", &this->bdata);
+    c4::serialize< char >(a, "mode_data", &this->mode_data);
+    c4::serialize< int >(a, "prop", &this->prop);
+    c4::serialize< int >(a, "prop2", &this->prop2);
+    c4::serialize< float >(a, "more_data", &this->more_data);
+    c4::serialize< double >(a, "yet_more_data", &this->yet_more_data);
+    c4::serialize< TestEnum_e >(a, "ste", &this->ste);
+    c4::serialize< TestStruct >(a, "ts", &this->ts);
+    c4::serialize< TestTpl<uint32_t> >(a, "ttpl", &this->ttpl);
 }
 /** imgui: auto-generated from main.hpp:110: C4_CLASS: ThisIsATest */
 
