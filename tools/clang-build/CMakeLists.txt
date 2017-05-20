@@ -1,20 +1,8 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.2)
 
 project(clang-build)
 
 option(CLANGBUILD_USE_IWYU "" ON)
-
-file(READ ${CMAKE_CURRENT_SOURCE_DIR}/../../CLANG_VERSION.txt CLANG_VERSION)
-string(REGEX REPLACE "\n$" "" CLANG_VERSION "${CLANG_VERSION}")
-if(CLANG_VERSION STREQUAL "3.8")
-    set(CLANG_VERSION 3.8.1)
-elseif(CLANG_VERSION STREQUAL "3.9")
-    set(CLANG_VERSION 3.9.1)
-elseif(CLANG_VERSION STREQUAL "4.0")
-    set(CLANG_VERSION 4.0.0)
-else()
-    message(FATAL_ERROR "unsupported clang version: ${CLANG_VERSION}")
-endif()
 
 set(IDIR ${CMAKE_INSTALL_PREFIX}) # install dir
 set(SDIR ${CMAKE_SOURCE_DIR}) # source dir
@@ -49,33 +37,6 @@ function(download_file url dest)
     endif()
 endfunction()
 
-download_file(
-    https://raw.githubusercontent.com/biojppm/cmake/master/ExternalProjectUtils.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/ExternalProjectUtils.cmake
-    )
-
-download_file(
-    https://raw.githubusercontent.com/biojppm/cmake/master/PrintVar.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake
-    )
-
-#------------------------------------------------------------------------------
-
-download_file(
-    http://releases.llvm.org/${CLANG_VERSION}/llvm-${CLANG_VERSION}.src.tar.xz
-    ${SDIR}/llvm-${CLANG_VERSION}.src.tar.xz
-    )
-
-download_file(
-    http://releases.llvm.org/${CLANG_VERSION}/cfe-${CLANG_VERSION}.src.tar.xz
-    ${SDIR}/cfe-${CLANG_VERSION}.src.tar.xz
-    )
-
-download_file(
-    http://releases.llvm.org/${CLANG_VERSION}/clang-tools-extra-${CLANG_VERSION}.src.tar.xz
-    ${SDIR}/clang-tools-extra-${CLANG_VERSION}.src.tar.xz
-    )
-
 function(unpack_to file dir)
     get_filename_component(basename ${file} NAME)
     set(_mark ${CMAKE_CURRENT_BINARY_DIR}/${basename}.done)
@@ -102,19 +63,32 @@ function(unpack_to file dir)
                 #RELATIVE "${workdir}/${basename}"
                 "${workdir}/${basename}/*")
             message(STATUS "file list: ${files}")
-            execute_process(COMMAND mv ${files} ${dir})
+            # for some reason the next command does nothing...
             #execute_process(COMMAND "${CMAKE_COMMAND}" -E copy "${files}" "${dir}")
-            #execute_process(COMMAND "${CMAKE_COMMAND}" -E remove_directory "${workdir}")
+            # ... so brute force it by using mv directly. FIX THIS.
+            execute_process(COMMAND mv ${files} ${dir})
+            if(workdir STREQUAL "")
+                message(FATAL_ERROR "dont remove any empty directory - this can go very wrong")
+            else()
+                execute_process(COMMAND "${CMAKE_COMMAND}" -E remove_directory "${workdir}")
+            endif()
         endif()
         execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${_mark}")
         message(STATUS "finished unpacking ${file} ----> ${dir}")
     endif()
 endfunction()
 
-set(_cldir ${SDIR}/llvm-${CLANG_VERSION})
-unpack_to(${SDIR}/llvm-${CLANG_VERSION}.src.tar.xz ${_cldir})
-unpack_to(${SDIR}/cfe-${CLANG_VERSION}.src.tar.xz ${_cldir}/tools/clang)
-unpack_to(${SDIR}/clang-tools-extra-${CLANG_VERSION}.src.tar.xz ${_cldir}/tools/clang/tools)
+#------------------------------------------------------------------------------
+
+download_file(
+    https://raw.githubusercontent.com/biojppm/cmake/master/ExternalProjectUtils.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/ExternalProjectUtils.cmake
+    )
+
+download_file(
+    https://raw.githubusercontent.com/biojppm/cmake/master/PrintVar.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake
+    )
 
 #------------------------------------------------------------------------------
 
@@ -128,14 +102,54 @@ list(APPEND CMK_ARGS -DCMAKE_PREFIX_PATH=${IDIR})
 list(APPEND CMK_ARGS -DCMAKE_INCLUDE_PATH=${IDIR}/include)
 list(APPEND CMK_ARGS -DCMAKE_LIBRARY_PATH=${IDIR}/lib)
 
-ExternalProject_Add(clang-build
-    PREFIX clang-build
-    DOWNLOAD_COMMAND ""
-    SOURCE_DIR ${SDIR}/llvm-${CLANG_VERSION}
-    BINARY_DIR ${BDIR}/clang-build
-    INSTALL_DIR ${IDIR}
-    CMAKE_ARGS ${CMK_ARGS}
-    )
+#------------------------------------------------------------------------------
+
+if(NOT CLANG_VERSION)
+    set(CLANG_VERSION 3.9.1)
+endif()
+
+foreach(ver ${CLANG_VERSION})
+
+    download_file(
+        http://releases.llvm.org/${ver}/llvm-${ver}.src.tar.xz
+        ${SDIR}/llvm-${ver}.src.tar.xz
+        )
+
+    download_file(
+        http://releases.llvm.org/${ver}/cfe-${ver}.src.tar.xz
+        ${SDIR}/cfe-${ver}.src.tar.xz
+        )
+
+    download_file(
+        http://releases.llvm.org/${ver}/clang-tools-extra-${ver}.src.tar.xz
+        ${SDIR}/clang-tools-extra-${ver}.src.tar.xz
+        )
+
+    unpack_to(
+        ${SDIR}/llvm-${ver}.src.tar.xz
+        ${SDIR}/llvm-${ver}
+        )
+
+    unpack_to(
+        ${SDIR}/cfe-${ver}.src.tar.xz
+        ${SDIR}/llvm-${ver}/tools/clang
+        )
+
+    unpack_to(
+        ${SDIR}/clang-tools-extra-${ver}.src.tar.xz
+        ${SDIR}/llvm-${ver}/tools/clang/tools/extra
+        )
+
+    ExternalProject_Add(llvm-${ver}
+        PREFIX llvm-${ver}
+        DOWNLOAD_COMMAND ""
+        SOURCE_DIR ${SDIR}/llvm-${ver}
+        BINARY_DIR ${BDIR}/llvm-${ver}
+        INSTALL_DIR ${IDIR}/llvm-${ver}
+        CMAKE_ARGS ${CMK_ARGS}
+        )
+
+endforeach()
 
 #------------------------------------------------------------------------------
 
