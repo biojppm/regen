@@ -5,42 +5,34 @@ project(clang-build)
 option(CLANGBUILD_USE_IWYU "" ON)
 
 set(IDIR ${CMAKE_INSTALL_PREFIX}) # install dir
-set(SDIR ${CMAKE_SOURCE_DIR}) # source dir
+set(SDIR ${CMAKE_SOURCE_DIR}/src) # source dir
+set(PDIR ${CMAKE_SOURCE_DIR}/src/pack) # packs dir
 set(BDIR ${CMAKE_BINARY_DIR}/bindirs) # common dir to place binary dirs of each proj
-
-if(MSVC)
-    set(disabled_warnings
-        /wd4018   # '<': signed/unsigned mismatch
-        /wd4101   # 't': unreferenced local variable
-        /wd4244   # conversion from 'type1' to 'type2', possible loss of data
-        /wd4267   # conversion from 'type1' to 'type2', possible loss of data
-        /wd4305   # 'initializing': truncation from 'double' to 'float'
-        /wd4309   # 'argument': truncation of constant value
-        /wd4312   # 'type cast': conversion from 'int' to 'unsigned char *' of greater size
-        /wd4800   # 'int': forcing value to bool 'true' or 'false'
-        /wd4996   # This function or variable may be unsafe
-        )
-
-    foreach(dw ${disabled_warnings})
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${dw}")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${dw}")
-    endforeach()
-endif()
 
 #------------------------------------------------------------------------------
 
-function(download_file url dest)
-    if(NOT EXISTS ${dest})
-        message(STATUS "downloading ${url}...")
-        file(DOWNLOAD ${url} ${dest})
-        message(STATUS "finished downloading: ${dest}")
+function(download_file_with_name url dest_file)
+    if(NOT EXISTS ${dest_file})
+        get_filename_component(dest_dir ${dest_file} DIRECTORY)
+        if(NOT EXISTS ${dest_dir})
+            file(MAKE_DIRECTORY ${dest_dir})
+        endif()
+        message(STATUS "downloading ${url} ... ${dest_file}")
+        file(DOWNLOAD ${url} ${dest_file})
+        message(STATUS "finished downloading: ${dest_file}")
     endif()
+endfunction()
+
+function(download_file url dest_dir)
+    get_filename_component(basename ${url} NAME)
+    set(dest ${dest_dir}/${basename})
+    download_file_with_name(${url} ${dest})
 endfunction()
 
 function(unpack_to file dir)
     get_filename_component(basename ${file} NAME)
     set(_mark ${CMAKE_CURRENT_BINARY_DIR}/${basename}.done)
-    if(NOT EXISTS ${_mark})
+    if(NOT EXISTS "${_mark}")
         message(STATUS "unpacking ${file} ----> ${dir}")
         get_filename_component(workdir ${file} DIRECTORY)
         set(workdir ${workdir}/unpack-temp)
@@ -80,23 +72,20 @@ endfunction()
 
 #------------------------------------------------------------------------------
 
-download_file(
-    https://raw.githubusercontent.com/biojppm/cmake/master/ExternalProjectUtils.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/ExternalProjectUtils.cmake
-    )
+set(cmk_repo_url https://raw.githubusercontent.com/biojppm/cmake/master)
 
-download_file(
-    https://raw.githubusercontent.com/biojppm/cmake/master/PrintVar.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake
-    )
+download_file(${cmk_repo_url}/ExternalProjectUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
+download_file(${cmk_repo_url}/PrintVar.cmake ${CMAKE_CURRENT_BINARY_DIR})
+download_file(${cmk_repo_url}/PatchUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
 
 #------------------------------------------------------------------------------
 
 include(ExternalProject)
+include(${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/PatchUtils.cmake)
 # this allows forwarding our compilation environment to each of the subprojects.
 include(${CMAKE_CURRENT_BINARY_DIR}/ExternalProjectUtils.cmake)
-include(${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake)
-ExternalProject_GetFwdArgs(CMK_ARGS)
+ExternalProject_GetFwdArgs(CMK_ARGS EXCLUDE CMAKE_INSTALL_PREFIX)
 
 list(APPEND CMK_ARGS -DCMAKE_PREFIX_PATH=${IDIR})
 list(APPEND CMK_ARGS -DCMAKE_INCLUDE_PATH=${IDIR}/include)
@@ -109,46 +98,40 @@ if(NOT CLANG_VERSION)
 endif()
 
 foreach(ver ${CLANG_VERSION})
+    download_file(http://releases.llvm.org/${ver}/llvm-${ver}.src.tar.xz ${PDIR})
+    download_file(http://releases.llvm.org/${ver}/cfe-${ver}.src.tar.xz ${PDIR})
+    download_file(http://releases.llvm.org/${ver}/clang-tools-extra-${ver}.src.tar.xz ${PDIR})
 
-    download_file(
-        http://releases.llvm.org/${ver}/llvm-${ver}.src.tar.xz
-        ${SDIR}/llvm-${ver}.src.tar.xz
-        )
+    unpack_to(${PDIR}/llvm-${ver}.src.tar.xz ${SDIR}/llvm-${ver})
+    unpack_to(${PDIR}/cfe-${ver}.src.tar.xz ${SDIR}/llvm-${ver}/tools/clang)
+    unpack_to(${PDIR}/clang-tools-extra-${ver}.src.tar.xz ${SDIR}/llvm-${ver}/tools/clang/tools/extra)
+endforeach()
 
-    download_file(
-        http://releases.llvm.org/${ver}/cfe-${ver}.src.tar.xz
-        ${SDIR}/cfe-${ver}.src.tar.xz
-        )
+#------------------------------------------------------------------------------
+# apply needed patches
 
-    download_file(
-        http://releases.llvm.org/${ver}/clang-tools-extra-${ver}.src.tar.xz
-        ${SDIR}/clang-tools-extra-${ver}.src.tar.xz
-        )
+if(MSVC)
+    if(EXISTS ${SDIR}/llvm-3.8.1)
+        download_file(
+            https://reviews.llvm.org/file/data/6z2btxju5oncuarrb32x/PHID-FILE-6g5o4tz7xufvgrcghkv3/D20492.diff
+            ${CMAKE_CURRENT_BINARY_DIR}
+            )
+        set(mark ${SDIR}/llvm-3.8.1/D20492.diff.patch.done)
+        apply_patch(${CMAKE_CURRENT_BINARY_DIR}/D20492.diff ${SDIR}/llvm-3.8.1 ${mark})
+    endif()
+endif()
 
-    unpack_to(
-        ${SDIR}/llvm-${ver}.src.tar.xz
-        ${SDIR}/llvm-${ver}
-        )
+#------------------------------------------------------------------------------
 
-    unpack_to(
-        ${SDIR}/cfe-${ver}.src.tar.xz
-        ${SDIR}/llvm-${ver}/tools/clang
-        )
-
-    unpack_to(
-        ${SDIR}/clang-tools-extra-${ver}.src.tar.xz
-        ${SDIR}/llvm-${ver}/tools/clang/tools/extra
-        )
-
+foreach(ver ${CLANG_VERSION})
     ExternalProject_Add(llvm-${ver}
         PREFIX llvm-${ver}
         DOWNLOAD_COMMAND ""
         SOURCE_DIR ${SDIR}/llvm-${ver}
         BINARY_DIR ${BDIR}/llvm-${ver}
-        INSTALL_DIR ${IDIR}/llvm-${ver}
-        CMAKE_ARGS ${CMK_ARGS}
+        #INSTALL_DIR ${IDIR}/llvm-${ver}
+        CMAKE_ARGS ${CMK_ARGS}#;-DCMAKE_INSTALL_PREFIX=${IDIR}/llvm-${ver}"
         )
-
 endforeach()
 
 #------------------------------------------------------------------------------

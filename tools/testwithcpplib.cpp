@@ -2,6 +2,6 @@
 
 int main(int argc, const char* argv[])
 {
-    std::cout << "hello world\n";
+    std::cout << "cpplib: hello world\n";
     return 4;
 }

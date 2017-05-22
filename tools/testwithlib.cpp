@@ -2,6 +2,6 @@
 
 int main(int argc, const char* argv[])
 {
-    std::printf("hello world\n");
+    std::printf("libc: hello world\n");
     return 3;
 }
