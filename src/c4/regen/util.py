@@ -3,7 +3,38 @@ import subprocess
 
 debug_mode = True
 
+hdr_ext = '.hpp'
+src_ext = '.cpp'
 
+hdr_exts = ['.h', '.hpp', '.hxx', '.hh', '.H', '.h++']
+src_exts = ['.c', '.cpp', '.cxx', '.cc', '.C', '.c++']
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def ext(file_name):
+    """returns the last extension of a file name"""
+    return os.path.splitext(file_name)[1]
+
+
+def is_hdr(file_name):
+    """returns true if the given file name is a C/C++ header file (.h/.hpp and similar)"""
+    return ext(file_name) in hdr_exts
+
+
+def is_src(file_name):
+    """returns true if the given file name is a C/C++ source file (.c/.cpp and similar)"""
+    return ext(file_name) in src_exts
+
+
+def inc_guard(header_name):
+    """convert a header file name into an include guard"""
+    return "_{0}_".format(re.sub(r'[./\\]','_', header_name.upper()))
+
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def logerr(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 

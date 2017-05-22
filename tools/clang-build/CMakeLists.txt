@@ -13,10 +13,6 @@ set(BDIR ${CMAKE_BINARY_DIR}/bindirs) # common dir to place binary dirs of each 
 include(util.cmake)
 ExternalProject_GetFwdArgs(CMK_ARGS EXCLUDE CMAKE_INSTALL_PREFIX)
 
-list(APPEND CMK_ARGS -DCMAKE_PREFIX_PATH=${IDIR})
-list(APPEND CMK_ARGS -DCMAKE_INCLUDE_PATH=${IDIR}/include)
-list(APPEND CMK_ARGS -DCMAKE_LIBRARY_PATH=${IDIR}/lib)
-
 #------------------------------------------------------------------------------
 
 if(NOT CLANG_VERSION)
