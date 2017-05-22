@@ -145,15 +145,16 @@ using different branches).
 libclang on windows
 ^^^^^^^^^^^^^^^^^^^
 
-`clang is hard to use on windows
-<https://www.reddit.com/r/cpp/comments/50x2ee/how_to_get_clang_to_work/>`_.
-While these rough edges are rounded out by the clang developers, we need to
-deal with its windows problems.
+`libclang is hard to use on windows
+<https://www.reddit.com/r/cpp/comments/50x2ee/how_to_get_clang_to_work/>`_,
+but it is useable.
+While its rough edges are rounded out by the clang developers, we need to
+deal with its windows problems:
 
 * The official installer for version 3.8.1 on the LLVM site `is broken with
-VS2015 Update 3
-<http://lists.llvm.org/pipermail/cfe-dev/2016-June/049748.html>`_, so it
-won't work out of the box when the C++ library is used.
+  VS2015 Update 3
+  <http://lists.llvm.org/pipermail/cfe-dev/2016-June/049748.html>`_, so it
+  won't work out of the box when the C++ library is used.
 * clang 3.9.1 needs to be run with the Visual Studio developer environment,
   or it will cause a linker error (no kernel32).
 
@@ -163,11 +164,11 @@ this:
 
 .. code:: bash
 
-  cd regen/tools/clang-build
-  mkdir build
-  cd build
-  cmake -DCLANG_VERSION=3.8.1 ..
-  cmake --build --config Release .
+    cd regen/tools/clang-build
+    mkdir build
+    cd build
+    cmake -DCLANG_VERSION=3.8.1 ..
+    cmake --build --config Release .
 
 You can compile several versions at once. For example, to compile versions
 3.8.1, 3.9.1 and 4.0.0, you can configure with this command instead:
