@@ -171,8 +171,12 @@ this:
     cmake --build --config Release .
 
 You can compile several versions at once. For example, to compile versions
-3.8.1, 3.9.1 and 4.0.0, you can configure with this command instead:
-``cmake -DCLANG_VERSION="3.8.1;3.9.1;4.0.0" ..``.
+3.8.1, 3.9.1 and 4.0.0 in a single swoop, you can configure with this command
+instead:
+
+.. code:: bash
+
+    cmake -DCLANG_VERSION="3.8.1;3.9.1;4.0.0" ..
 
 Installing
 ----------
@@ -210,12 +214,13 @@ files. This works as expected in Unix and Mac, but symbolic links were only
 recently introduced in Windows. Git already allows you to use symbolic links
 in Windows, but the process is convoluted. Before cloning the repo, you must
 first `enable symlinks in windows
-<https://github.com/git-for-windows/git/wiki/Symbolic-Links>`_. Then you
-need to pass an option to clone to ensure that the files are really symbolic
-links. The clone command thus needs to be::
+<https://github.com/git-for-windows/git/wiki/Symbolic-Links>`_. Then you need
+to pass an option to ``git clone`` to ensure that the files are really
+symbolic links. The clone command thus needs to be:
 
 .. code:: bash
-   git clone -c core.symlinks=true https://github.com/biojppm/regen.git
+
+    git clone -c core.symlinks=true https://github.com/biojppm/regen.git
 
 
 License
