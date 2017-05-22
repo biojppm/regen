@@ -1,0 +1,197 @@
+Index: docs/LanguageExtensions.rst
+===================================================================
+--- docs/LanguageExtensions.rst
++++ docs/LanguageExtensions.rst
+@@ -1022,6 +1022,7 @@
+ * ``__is_nothrow_assignable`` (MSVC 2013, clang)
+ * ``__is_constructible`` (MSVC 2013, clang)
+ * ``__is_nothrow_constructible`` (MSVC 2013, clang)
++* ``__is_assignable`` (MSVC 2015, clang)
+ 
+ Blocks
+ ======
+Index: include/clang/Basic/TokenKinds.def
+===================================================================
+--- include/clang/Basic/TokenKinds.def
++++ include/clang/Basic/TokenKinds.def
+@@ -407,6 +407,9 @@
+ TYPE_TRAIT_N(__is_constructible, IsConstructible, KEYCXX)
+ TYPE_TRAIT_N(__is_nothrow_constructible, IsNothrowConstructible, KEYCXX)
+ 
++// MSVC14.0 / VS2015 Type Traits
++TYPE_TRAIT_2(__is_assignable, IsAssignable, KEYCXX)
++
+ // GNU and MS Type Traits
+ TYPE_TRAIT_1(__has_nothrow_assign, HasNothrowAssign, KEYCXX)
+ TYPE_TRAIT_1(__has_nothrow_move_assign, HasNothrowMoveAssign, KEYCXX)
+Index: include/clang/Basic/TypeTraits.h
+===================================================================
+--- include/clang/Basic/TypeTraits.h
++++ include/clang/Basic/TypeTraits.h
+@@ -74,6 +74,7 @@
+     BTT_IsConvertibleTo,
+     BTT_IsSame,
+     BTT_TypeCompatible,
++    BTT_IsAssignable,
+     BTT_IsNothrowAssignable,
+     BTT_IsTriviallyAssignable,
+     BTT_Last = BTT_IsTriviallyAssignable,
+Index: lib/Lex/PPMacroExpansion.cpp
+===================================================================
+--- lib/Lex/PPMacroExpansion.cpp
++++ lib/Lex/PPMacroExpansion.cpp
+@@ -1196,6 +1196,7 @@
+       .Case("has_trivial_destructor", LangOpts.CPlusPlus)
+       .Case("has_virtual_destructor", LangOpts.CPlusPlus)
+       .Case("is_abstract", LangOpts.CPlusPlus)
++      .Case("is_assignable", LangOpts.CPlusPlus)
+       .Case("is_base_of", LangOpts.CPlusPlus)
+       .Case("is_class", LangOpts.CPlusPlus)
+       .Case("is_constructible", LangOpts.CPlusPlus)
+Index: lib/Parse/ParseDeclCXX.cpp
+===================================================================
+--- lib/Parse/ParseDeclCXX.cpp
++++ lib/Parse/ParseDeclCXX.cpp
+@@ -1269,6 +1269,7 @@
+       Tok.isOneOf(tok::kw___is_abstract,
+                   tok::kw___is_arithmetic,
+                   tok::kw___is_array,
++                  tok::kw___is_assignable,
+                   tok::kw___is_base_of,
+                   tok::kw___is_class,
+                   tok::kw___is_complete_type,
+Index: lib/Parse/ParseExpr.cpp
+===================================================================
+--- lib/Parse/ParseExpr.cpp
++++ lib/Parse/ParseExpr.cpp
+@@ -796,6 +796,7 @@
+           REVERTIBLE_TYPE_TRAIT(__is_abstract);
+           REVERTIBLE_TYPE_TRAIT(__is_arithmetic);
+           REVERTIBLE_TYPE_TRAIT(__is_array);
++          REVERTIBLE_TYPE_TRAIT(__is_assignable);
+           REVERTIBLE_TYPE_TRAIT(__is_base_of);
+           REVERTIBLE_TYPE_TRAIT(__is_class);
+           REVERTIBLE_TYPE_TRAIT(__is_complete_type);
+Index: lib/Sema/SemaExprCXX.cpp
+===================================================================
+--- lib/Sema/SemaExprCXX.cpp
++++ lib/Sema/SemaExprCXX.cpp
+@@ -4459,6 +4459,7 @@
+     return !Result.isInvalid() && !SFINAE.hasErrorOccurred();
+   }
+ 
++  case BTT_IsAssignable:
+   case BTT_IsNothrowAssignable:
+   case BTT_IsTriviallyAssignable: {
+     // C++11 [meta.unary.prop]p3:
+@@ -4506,6 +4507,9 @@
+     if (Result.isInvalid() || SFINAE.hasErrorOccurred())
+       return false;
+ 
++    if (BTT == BTT_IsAssignable)
++      return true;
++
+     if (BTT == BTT_IsNothrowAssignable)
+       return Self.canThrow(Result.get()) == CT_Cannot;
+ 
+Index: test/Lexer/has_feature_type_traits.cpp
+===================================================================
+--- test/Lexer/has_feature_type_traits.cpp
++++ test/Lexer/has_feature_type_traits.cpp
+@@ -45,6 +45,11 @@
+ #endif
+ // CHECK: int is_abstract();
+ 
++#if __has_feature(is_assignable)
++int is_assignable();
++#endif
++// CHECK: int is_assignable();
++
+ #if __has_feature(is_base_of)
+ int is_base_of();
+ #endif
+Index: test/PCH/cxx-traits.h
+===================================================================
+--- test/PCH/cxx-traits.h
++++ test/PCH/cxx-traits.h
+@@ -20,6 +20,7 @@
+ struct __is_abstract {};  // expected-warning {{made available}}
+ struct __is_arithmetic {};  // expected-warning {{made available}}
+ struct __is_array {};  // expected-warning {{made available}}
++struct __is_assignable {};  // expected-warning {{made available}}
+ struct __is_base_of {};  // expected-warning {{made available}}
+ struct __is_class {};  // expected-warning {{made available}}
+ struct __is_complete_type {};  // expected-warning {{made available}}
+Index: test/PCH/cxx-traits.cpp
+===================================================================
+--- test/PCH/cxx-traits.cpp
++++ test/PCH/cxx-traits.cpp
+@@ -18,6 +18,7 @@
+ bool _is_abstract_result = __is_abstract(int);
+ bool _is_arithmetic_result = __is_arithmetic(int);
+ bool _is_array_result = __is_array(int);
++bool _is_assignable_result = __is_assignable(int, int);
+ bool _is_base_of_result = __is_base_of(int, int);
+ bool _is_class_result = __is_class(int);
+ bool _is_complete_type_result = __is_complete_type(int);
+Index: test/SemaCXX/type-traits.cpp
+===================================================================
+--- test/SemaCXX/type-traits.cpp
++++ test/SemaCXX/type-traits.cpp
+@@ -1514,6 +1514,9 @@
+ 
+   { int arr[T(__is_nothrow_assignable(HasNoThrowMoveAssign, HasNoThrowMoveAssign))]; }
+   { int arr[F(__is_nothrow_assignable(HasThrowMoveAssign, HasThrowMoveAssign))]; }
++
++  { int arr[T(__is_assignable(HasNoThrowMoveAssign, HasNoThrowMoveAssign))]; }
++  { int arr[T(__is_assignable(HasThrowMoveAssign, HasThrowMoveAssign))]; }
+ }
+ 
+ void has_trivial_move_assign() {
+@@ -1974,6 +1977,46 @@
+                                          TrivialMoveButNotCopy)))]; }
+   { int arr[T((__is_trivially_assignable(TrivialMoveButNotCopy&,
+                                          TrivialMoveButNotCopy&&)))]; }
++  { int arr[T((__is_trivially_assignable(int&, int)))]; }
++  { int arr[T((__is_trivially_assignable(int&, int&)))]; }
++  { int arr[T((__is_trivially_assignable(int&, int&&)))]; }
++  { int arr[T((__is_trivially_assignable(int&, const int&)))]; }
++  { int arr[T((__is_trivially_assignable(POD&, POD)))]; }
++  { int arr[T((__is_trivially_assignable(POD&, POD&)))]; }
++  { int arr[T((__is_trivially_assignable(POD&, POD&&)))]; }
++  { int arr[T((__is_trivially_assignable(POD&, const POD&)))]; }
++  { int arr[T((__is_trivially_assignable(int*&, int*)))]; }
++  { int arr[T((__is_trivially_assignable(AllDefaulted,
++                                         const AllDefaulted &)))]; }
++  { int arr[T((__is_trivially_assignable(AllDefaulted,
++                                         AllDefaulted &&)))]; }
++
++  { int arr[F((__is_assignable(int *&, float *)))]; }
++  { int arr[T((__is_assignable(HasCopyAssign &, HasCopyAssign)))]; }
++  { int arr[T((__is_assignable(HasCopyAssign &, HasCopyAssign &)))]; }
++  { int arr[T((__is_assignable(HasCopyAssign &, const HasCopyAssign &)))]; }
++  { int arr[T((__is_assignable(HasCopyAssign &, HasCopyAssign &&)))]; }
++  { int arr[T((__is_assignable(TrivialMoveButNotCopy &,
++                               TrivialMoveButNotCopy &)))]; }
++  { int arr[T((__is_assignable(TrivialMoveButNotCopy &,
++                               const TrivialMoveButNotCopy &)))]; }
++  { int arr[F((__is_assignable(AllDeleted,
++                               const AllDeleted &)))]; }
++  { int arr[F((__is_assignable(AllDeleted,
++                               AllDeleted &&)))]; }
++  { int arr[T((__is_assignable(ExtDefaulted,
++                               const ExtDefaulted &)))]; }
++  { int arr[T((__is_assignable(ExtDefaulted,
++                               ExtDefaulted &&)))]; }
++
++  { int arr[T((__is_assignable(HasDefaultTrivialCopyAssign &,
++                               HasDefaultTrivialCopyAssign &)))]; }
++  { int arr[T((__is_assignable(HasDefaultTrivialCopyAssign &,
++                               const HasDefaultTrivialCopyAssign &)))]; }
++  { int arr[T((__is_assignable(TrivialMoveButNotCopy &,
++                               TrivialMoveButNotCopy)))]; }
++  { int arr[T((__is_assignable(TrivialMoveButNotCopy &,
++                               TrivialMoveButNotCopy &&)))]; }
+ }
+ 
+ void constructible_checks() {

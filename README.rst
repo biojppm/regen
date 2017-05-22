@@ -10,9 +10,6 @@ regen
 generation. It uses the AST provided by LLVM's libclang, which is processed
 by user-provided source-code generators to automatically generate C/C++
 source code. This is done via a `template engine (jinja2)
-<http://jinja.pocoo.org/>`_ for generating the code. Examples of application
-are maintenance-free enum strings, object-tree serialization or property
-systems with arbitrary per-property annotations.
 <http://jinja.pocoo.org/docs/2.9/templates/>`_ for generating the
 code. Examples of application are maintenance-free enum strings, object-tree
 serialization or property systems with arbitrary per-property annotations.

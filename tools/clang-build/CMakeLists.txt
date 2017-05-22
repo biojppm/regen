@@ -110,14 +110,14 @@ endforeach()
 #------------------------------------------------------------------------------
 # apply needed patches
 
+# clang 3.8.1 needs to be patched for VS2015 Update 3.
+# the patch is downloaded and adapted from https://reviews.llvm.org/D20492
+# clang will also need -fms-compatibility-version=19
+# see also https://www.reddit.com/r/cpp/comments/50x2ee/how_to_get_clang_to_work/
 if(MSVC)
     if(EXISTS ${SDIR}/llvm-3.8.1)
-        download_file(
-            https://reviews.llvm.org/file/data/6z2btxju5oncuarrb32x/PHID-FILE-6g5o4tz7xufvgrcghkv3/D20492.diff
-            ${CMAKE_CURRENT_BINARY_DIR}
-            )
         set(mark ${SDIR}/llvm-3.8.1/D20492.diff.patch.done)
-        apply_patch(${CMAKE_CURRENT_BINARY_DIR}/D20492.diff ${SDIR}/llvm-3.8.1 ${mark})
+        apply_patch(${CMAKE_CURRENT_SOURCE_DIR}/D20492.diff ${SDIR}/llvm-3.8.1/tools/clang ${mark})
     endif()
 endif()
 
