@@ -36,6 +36,7 @@ def load_clang(libdir=None): #, version=clang_version):
         if libdir is None:
             exe = find_llvm_config(version)
             _dbg("llvm-config=", exe)
+            clangxx = find_clangxx_exe(version)
             _dbg("clang++=", clangxx)
             if exe:
                 libdir = get_output(exe + " --libdir")
@@ -166,7 +167,6 @@ def xxx_compiler_preprocessor_verbose(compiler, extraflags):
         p = subprocess.Popen(cmd, stdin=devnull, stdout=PIPE, stderr=PIPE)
         p.wait()
         lines = p.stderr.read()
-        print(b"addddddddddddddddddddddddddddddddddddddddd\n" + lines)
         lines = lines.splitlines()
     return lines
 

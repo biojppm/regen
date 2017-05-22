@@ -61,12 +61,14 @@ endfunction()
 #------------------------------------------------------------------------------
 
 set(cmk_repo_url https://raw.githubusercontent.com/biojppm/cmake/master)
+download_file(${cmk_repo_url}/ExternalProjectUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
+download_file(${cmk_repo_url}/PrintVar.cmake ${CMAKE_CURRENT_BINARY_DIR})
+download_file(${cmk_repo_url}/PatchUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
+
+#------------------------------------------------------------------------------
+
 include(ExternalProject)
 include(${CMAKE_CURRENT_BINARY_DIR}/PrintVar.cmake)
 include(${CMAKE_CURRENT_BINARY_DIR}/PatchUtils.cmake)
 # this allows forwarding our compilation environment to each of the subprojects.
 include(${CMAKE_CURRENT_BINARY_DIR}/ExternalProjectUtils.cmake)
-
-download_file(${cmk_repo_url}/ExternalProjectUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
-download_file(${cmk_repo_url}/PrintVar.cmake ${CMAKE_CURRENT_BINARY_DIR})
-download_file(${cmk_repo_url}/PatchUtils.cmake ${CMAKE_CURRENT_BINARY_DIR})
