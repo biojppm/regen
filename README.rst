@@ -6,13 +6,13 @@
 regen
 =====
 
-`regen` is a python3 package providing C/C++ reflection and source-code
+``regen`` is a python3 package providing C/C++ reflection and source-code
 generation. You provide `your own code generation templates
 <http://jinja.pocoo.org/docs/2.9/templates/>`_ , and have full control over
 where the generated code goes. A flexible system of annotations is used, so
 that you can pass meta-values to your code generation templates.
 
-`regen` is ideal to be used as a pre-build step for your C/C++ project, but
+``regen`` is ideal to be used as a pre-build step for your C/C++ project, but
 it can also be used separately on a file by file basis. Examples of
 application are object-tree iteration utilities, or property systems with
 arbitrary per-property annotations, or maintenance-free enum strings.
@@ -23,14 +23,14 @@ change.
 How it works
 ------------
 
-`regen` receives two inputs: your C/C++ source code and the code generation
+``regen`` receives two inputs: your C/C++ source code and the code generation
 templates. The code generation templates are written for Python's `jinja2
-template engine <http://jinja.pocoo.org/docs/2.9/templates/>`_. `regen` uses
+template engine <http://jinja.pocoo.org/docs/2.9/templates/>`_. ``regen`` uses
 `libclang <http://clang.llvm.org/>`_ to parse your C/C++ code and produce an
 Abstract Syntax Tree (AST). This tree is processed to extract the
 features, which are then passed to each generator.
 
-You can see `regen` being used in the project's `examples folder`_.
+You can see ``regen`` being used in the project's `examples folder`_.
 
 
 Quick examples
@@ -90,7 +90,7 @@ Now use the following python code for parsing and generating, saved as
     if __name__ == "__main__":
         regen.run(writer, egen, [])
 
-Now generate the code:
+Now run ``regen`` to parse the source code and generate your code:
 
 .. code:: bash
 
@@ -132,7 +132,7 @@ Running
 
 Finding libclang
 ^^^^^^^^^^^^^^^^
-`regen` uses `libclang-py3 <https://pypi.python.org/pypi/libclang-py3>`_,
+``regen`` uses `libclang-py3 <https://pypi.python.org/pypi/libclang-py3>`_,
 which is a python wrapper for the libclang library. The current version of
 libclang-py3 requires libclang 3.8. regen tries to find libclang 3.8 by
 querying ``llvm-config --libdir`` (if ``llvm-config --version`` reports 3.8)
@@ -154,13 +154,17 @@ deal with its windows problems:
 * The official installer for version 3.8.1 on the LLVM site `is broken with
   VS2015 Update 3
   <http://lists.llvm.org/pipermail/cfe-dev/2016-June/049748.html>`_, so it
-  won't work out of the box when the C++ library is used.
+  won't work out of the box when the C++ library is used. It needs to be
+  compiled from source and patched (AFAIK there's no 3.8.2 release).
 * clang 3.9.1 needs to be run with the Visual Studio developer environment,
   or it will cause a linker error (no kernel32).
+* Use of the flag ``-fms-compatibility-version=19`` is required (even after
+  compiling).
 
-To deal with this, ``regen`` has a `clang build project`_, which downloads
-the clang source, patches it as needed, and installs it. You can use it like
-this:
+For this and other reasons it is sometimes good to compile clang from source.
+To make this task easier, ``regen`` has a `clang build project`_, which
+downloads the source code from llvm, clang and extra tools, patches it as
+needed, compiles and installs. You can use it like this:
 
 .. code:: bash
 
@@ -184,8 +188,8 @@ Installing
 From PyPi
 ^^^^^^^^^
 
-Installation is easy with the Python package repository. This will install
-pip along with its dependencies::
+``regen`` installation is easy with the Python package repository. This will
+install regen along with its dependencies::
 
     pip install regen
 
@@ -200,7 +204,7 @@ From source
 For development
 ^^^^^^^^^^^^^^^
 
-Setting up regen for development is easy:
+Setting up ``regen`` for development is easy:
 
 .. code:: bash
 
