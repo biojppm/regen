@@ -170,4 +170,4 @@ cmany is permissively licensed under the `MIT license`_.
 
 .. |license| image:: https://img.shields.io/badge/License-MIT-yellow.svg
    :alt: License: MIT
-   :target: https://opensource.org/licenses/MIT
+   :target: https://github.com/biojppm/regen/blob/master/LICENSE.txt
