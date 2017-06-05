@@ -1,8 +1,40 @@
 import sys
+import subprocess
 
-debug_mode = False
+debug_mode = True
+
+hdr_ext = '.hpp'
+src_ext = '.cpp'
+
+hdr_exts = ['.h', '.hpp', '.hxx', '.hh', '.H', '.h++']
+src_exts = ['.c', '.cpp', '.cxx', '.cc', '.C', '.c++']
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+def ext(file_name):
+    """returns the last extension of a file name"""
+    return os.path.splitext(file_name)[1]
 
 
+def is_hdr(file_name):
+    """returns true if the given file name is a C/C++ header file (.h/.hpp and similar)"""
+    return ext(file_name) in hdr_exts
+
+
+def is_src(file_name):
+    """returns true if the given file name is a C/C++ source file (.c/.cpp and similar)"""
+    return ext(file_name) in src_exts
+
+
+def inc_guard(header_name):
+    """convert a header file name into an include guard"""
+    return "_{0}_".format(re.sub(r'[./\\]','_', header_name.upper()))
+
+
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 def logerr(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
@@ -10,6 +42,23 @@ def logerr(*args, **kwargs):
 def dbg(*args, **kwargs):
     if debug_mode:
         print(*args, **kwargs, file=sys.stderr)
+
+
+def in_windows():
+    return sys.platform == "win32"
+
+
+def in_unix():
+    return sys.platform in ("linux", "linux2", "darwin")
+
+
+def get_output(cmd):
+    status, output = subprocess.getstatusoutput(cmd)
+    if status != 0:
+        msg = "command failed with status {}: {}\noutput was:\n{}"
+        msg = msg.format(status, cmd, output)
+        raise Exception(msg)
+    return output
 
 
 def cacheattr(obj, name, function):

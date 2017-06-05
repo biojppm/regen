@@ -11,40 +11,10 @@ from .util import dbg
 # ------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------
 
-hdr_ext = '.hpp'
-src_ext = '.cpp'
-
-hdr_exts = ['.h', '.hpp', '.hxx', '.hh', '.H', '.h++']
-src_exts = ['.c', '.cpp', '.cxx', '.cc', '.C', '.c++']
-
 tpl_env = jj2.Environment(trim_blocks=True, lstrip_blocks=True)
 
 chunk_intro = "/** {{generator}}: auto-generated from {{originator}} */\n"
 chunk_outro = ""
-
-
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-# ------------------------------------------------------------------------------
-
-def ext(file_name):
-    """returns the last extension of a file name"""
-    return os.path.splitext(file_name)[1]
-
-
-def is_hdr(file_name):
-    """returns true if the given file name is a C/C++ header file (.h/.hpp and similar)"""
-    return ext(file_name) in hdr_exts
-
-
-def is_src(file_name):
-    """returns true if the given file name is a C/C++ source file (.c/.cpp and similar)"""
-    return ext(file_name) in src_exts
-
-
-def inc_guard(header_name):
-    """convert a header file name into an include guard"""
-    return "_{0}_".format(re.sub(r'[./\\]','_', header_name.upper()))
 
 
 # -----------------------------------------------------------------------------
@@ -740,13 +710,13 @@ class SourceFile:
         #
         spl = os.path.splitext(self.filename)
         #
-        self.is_hdr = spl[1] == hdr_ext[1:]
-        self.name_hdr = spl[0] + hdr_ext
-        self.name_hdr_gen = spl[0] + '.gen' + hdr_ext
+        self.is_hdr = spl[1] == util.hdr_ext[1:]
+        self.name_hdr = spl[0] + util.hdr_ext
+        self.name_hdr_gen = spl[0] + '.gen' + util.hdr_ext
         #
-        self.is_src = spl[1] == src_ext[1:]
-        self.name_src = spl[0] + src_ext
-        self.name_src_gen = spl[0] + '.gen' + src_ext
+        self.is_src = spl[1] == util.src_ext[1:]
+        self.name_src = spl[0] + util.src_ext
+        self.name_src_gen = spl[0] + '.gen' + util.src_ext
 
     def parse(self, parse_args=[]):
         self.trans_unit = clu.parse_file(self.filename, parse_args)
@@ -930,13 +900,13 @@ def splitlines(s):
 
 
 def pump_to_file(outfile, contents, mark, begin_tag=None, end_tag=None):
-    f = open(outfile, "r")
-    lines = f.readlines()
-    f.close()
+    with open(outfile, "r") as f:
+        lines = f.readlines()
+        f.close()
     outlines = pump(contents, lines, is_hdr(outfile), mark, begin_tag, end_tag)
-    f = open(outfile, "w")
-    f.writelines(outlines)
-    f.close()
+    with opent(outfile, "w") as f:
+        f.writelines(outlines)
+        f.close()
 
 
 def pump(contents_to_insert, lines, lines_are_from_header, mark, begin_tag=None, end_tag=None):
@@ -956,6 +926,7 @@ def pump(contents_to_insert, lines, lines_are_from_header, mark, begin_tag=None,
                 break
     else:
         assert begin_tag == end_tag
+    #
     if num_lines == 0:
         first_line, num_lines = lookup_line_range_unique(begin_tag, end_tag, lines)
         if num_lines == 0:
