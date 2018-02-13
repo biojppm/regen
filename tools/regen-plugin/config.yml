@@ -1,0 +1,65 @@
+
+writer: genfile
+
+enum_generators: #
+  enum_symbols: # this is the name of this generator
+    tag: C4_ENUM
+    preamble: |
+      #include "enum_pairs.h"
+    hdr: |
+      template<> const EnumPairs<{{enum.type}}> enum_pairs();
+    src: |
+      template<> const EnumPairs<{{enum.type}}> enum_pairs()
+      {
+          static const EnumAndName<{{enum.type}}> vals[] = {
+              {% for e in enum.symbols %}
+              { {{e.name}}, "{{e.name}}"},
+              {% endfor %}
+          };
+          EnumPairs< {{enum.type}} > r(vals);
+          return r;
+      }
+
+class_generators:
+  serialize:
+    tag: C4_CLASS
+    hdr_preamble: |
+      #include "serialize.hpp"
+    hdr: |
+      namespace c4 {
+      template <{{tpl_params}}>
+      struct serialize_category< {{type}} >
+      { enum : int { value = (int)SerializeCategory_e::METHOD }; };
+      } // namespace c4
+
+      {%if is_tpl %}
+      template <{{tpl_params}}>
+      {% endif %}
+      template <class Stream>
+      void {{type}}::serialize(c4::Archive< Stream > &a, const char *name)
+      {
+          {% for m in members %}
+          c4::serialize< {{m.type}} >(a, "{{m.name}}", &this->{{m.name}});
+          {% endfor %}
+      }    
+  gui:
+    tag: C4_GUI
+    hdr_preamble: |
+      #include "imgui.h"
+    hdr: |
+      namespace c4 {
+      template <{{tpl_params}}>
+      struct serialize_category< {{type}} >
+      { enum : int { value = (int)SerializeCategory_e::METHOD }; };
+      } // namespace c4
+
+      {%if is_tpl %}
+      template <{{tpl_params}}>
+      {% endif %}
+      template <class Stream>
+      void {{type}}::serialize(c4::Archive< Stream > &a, const char *name)
+      {
+          {% for m in members %}
+          c4::serialize< {{m.type}} >(a, "{{m.name}}", &this->{{m.name}});
+          {% endfor %}
+      }    
