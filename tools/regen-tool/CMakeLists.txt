@@ -17,7 +17,7 @@ target_link_libraries(regen-tool
   clangDriver
   clangFrontend
   clangTooling
-  ryml
+#  ryml
   )
 
 install(TARGETS regen-tool

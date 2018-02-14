@@ -1,52 +1,3 @@
-#ifdef WTF
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendAction.h"
-#include "clang/Tooling/Tooling.h"
-
-using namespace clang;
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-class RegenVisitor : public RecursiveASTVisitor<RegenVisitor>
-{
-public:
-
-    explicit RegenVisitor(ASTContext *Context) : Context(Context) {}
-
-    bool VisitCXXRecordDecl(CXXRecordDecl *Declaration)
-    {
-        FullSourceLoc loc = Context->getFullLoc(Declaration->getLocStart());
-        llvm::outs() << loc.getFileEntry()->getName() << ":"
-                     << loc.getSpellingLineNumber() << ":"
-                     << loc.getSpellingColumnNumber() << ": "
-                     << Declaration->getQualifiedNameAsString() << "\n";
-        return false;
-    }
-
-private:
-
-    ASTContext *Context;
-};
-
-
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int main(int argc, char **argv) {
-  if (argc > 1) {
-    clang::tooling::runToolOnCode(new RegenAction, argv[1]);
-  }
-}
-#endif
-
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 #include "clang/AST/ASTConsumer.h"
 #include "clang/AST/RecursiveASTVisitor.h"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
@@ -89,7 +40,7 @@ static cl::extrahelp MoreHelp(
 
 static cl::OptionCategory RegenToolCategory("regen-tool options");
 static std::unique_ptr<opt::OptTable> Options(createDriverOptTable());
-static cl::opt<std::string> ConfigFile("config-file", _c4expl("path to the configuration file"));
+static cl::opt<std::string> ConfigFile("config-file", _c4expl("path to the regen yml configuration file"));
 static cl::opt<bool       > ASTDump("ast-dump", _c4desc(OPT_ast_dump));
 static cl::opt<bool       > ASTList("ast-list", _c4desc(OPT_ast_list));
 static cl::opt<bool       > ASTPrint("ast-print", _c4desc(OPT_ast_print));
@@ -98,8 +49,6 @@ static cl::opt<std::string> ASTDumpFilter("ast-dump-filter", _c4desc(OPT_ast_dum
 #undef _c4desc
 #undef _c4expl
 
-
-namespace {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -133,18 +82,19 @@ class RegenConsumer : public clang::ASTConsumer
 {
 public:
 
-    explicit RegenConsumer(clang::ASTContext *Context) : Visitor(Context) {}
+    explicit RegenConsumer(clang::ASTContext *Context) : visitor(Context) {}
 
     virtual void HandleTranslationUnit(clang::ASTContext &Context)
     {
-        Visitor.TraverseDecl(Context.getTranslationUnitDecl());
+        visitor.TraverseDecl(Context.getTranslationUnitDecl());
     }
 
 private:
 
-    RegenVisitor Visitor;
+    RegenVisitor visitor;
 
 };
+
 
 
 
@@ -154,10 +104,11 @@ private:
 class RegenAction : public clang::ASTFrontendAction
 {
 public:
-  virtual std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &Compiler, llvm::StringRef InFile)
-  {
-    return std::unique_ptr<clang::ASTConsumer>(new RegenConsumer(&Compiler.getASTContext()));
-  }
+    using uptr = std::unique_ptr<clang::ASTConsumer>;
+    virtual uptr CreateASTConsumer(clang::CompilerInstance &Compiler, llvm::StringRef InFile)
+    {
+        return uptr(new RegenConsumer(&Compiler.getASTContext()));
+    }
 };
 
 
@@ -173,14 +124,10 @@ public:
         if     (ASTList)  return clang::CreateASTDeclNodeLister();
         else if(ASTDump)  return clang::CreateASTDumper(ASTDumpFilter, /*DumpDecls=*/true, /*Deserialize=*/false, /*DumpLookups=*/false);
         else if(ASTPrint) return clang::CreateASTPrinter(nullptr, ASTDumpFilter);
-        //return llvm::make_unique<RegenAction>();
-        return llvm::make_unique<clang::ASTConsumer>();
+        return {};
     }
 
 };
-
-} // namespace
-
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -206,7 +153,14 @@ int main(int argc, const char **argv)
     RegenToolActionFactory rfac;
     std::unique_ptr<FrontendActionFactory> ffac = newFrontendActionFactory(&rfac);
 
-    return tool.run(FrontendFactory.get());
+    if(ASTList || ASTDump || ASTPrint)
+    {
+        return tool.run(ffac.get());
+    }
+    else
+    {
+        return tool.run(newFrontendActionFactory<RegenAction>().get());
+    }
 
-    clang::tooling::runToolOnCode(new RegenAction, argv[1]);
+    //clang::tooling::runToolOnCode(new RegenAction, argv[1]);
 }
