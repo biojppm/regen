@@ -1,12 +1,14 @@
 #ifndef _C4_REGEN_HPP_
 #define _C4_REGEN_HPP_
 
-#include <vector>
-#include <memory>
 #include <cstdio>
+#include <vector>
+#include <set>
 
 #include <c4/yml/yml.hpp>
-#include <c4/tpl/engine.hpp>
+#include <c4/yml/std/vector.hpp>
+#include <c4/yml/std/string.hpp>
+#include "./regenxx/rapidyaml/test/c4/tpl/engine.hpp" // FIXME
 
 namespace c4 {
 namespace regen {
@@ -34,7 +36,7 @@ void file_get_contents(const char *filename, std::vector< char > *v)
         std::fread(&(*v)[0], 1, v->size(), fp);
         std::fclose(fp);
     }
-    throw(errno);
+    C4_ERROR("could not open file");
 }
 
 //-----------------------------------------------------------------------------
@@ -43,7 +45,7 @@ void file_get_contents(const char *filename, std::vector< char > *v)
 
 struct Region
 {
-    struct Pos { size_t offset, line, col };
+    struct Pos { size_t offset, line, col; };
 
     const char * m_file;
     Pos          m_start;
@@ -108,9 +110,11 @@ struct Enum : public Originator
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
+struct Generator;
+
 struct CodeChunk
 {
-    Generator *m_generator;
+    Generator const* m_generator;
     CodeEntity m_originator;
     Rope m_hdr_preamble;
     Rope m_inl_preamble;
@@ -146,11 +150,12 @@ struct Generator
         m_empty(true)
     {
     }
+    virtual ~Generator() = default;
 
     void load(DataNode const& n)
     {
         m_name = n.key();
-        n["tag"] >> m_tag;
+        m_tag = n["tag"].val();
         load_tpl(n, "hdr_preamble", &m_hdr_preamble);
         load_tpl(n, "inl_preamble", &m_inl_preamble);
         load_tpl(n, "src_preamble", &m_src_preamble);
@@ -168,28 +173,28 @@ struct Generator
         m_empty = false;
     }
 
-    void generate(Originator const& o, DataNode *root, CodeChunk *ch)
+    void generate(Originator const& o, DataNode *root, CodeChunk *ch) const
     {
         if(m_empty) return;
-        ch->m_generator = &this;
+        ch->m_generator = this;
         ch->m_originator = o;
-        create_prop_tree(root);
+        create_prop_tree(o, root);
         render(*root, ch);
     }
 
-    virtual void create_prop_tree(Originator const& o, DataNode *root) = 0;
+    virtual void create_prop_tree(Originator const& o, DataNode *root) const = 0;
 
-    void render(DataNode const& properties, CodeChunk *ch)
+    void render(DataNode const& properties, CodeChunk *ch) const
     {
-        render_tpl(properties, m_hdr_preamble, ch->m_hdr_preamble);
-        render_tpl(properties, m_inl_preamble, ch->m_inl_preamble);
-        render_tpl(properties, m_src_preamble, ch->m_src_preamble);
-        render_tpl(properties, m_hdr, ch->m_hdr);
-        render_tpl(properties, m_inl, ch->m_inl);
-        render_tpl(properties, m_src, ch->m_src);
+        render_tpl(properties, m_hdr_preamble, &ch->m_hdr_preamble);
+        render_tpl(properties, m_inl_preamble, &ch->m_inl_preamble);
+        render_tpl(properties, m_src_preamble, &ch->m_src_preamble);
+        render_tpl(properties, m_hdr, &ch->m_hdr);
+        render_tpl(properties, m_inl, &ch->m_inl);
+        render_tpl(properties, m_src, &ch->m_src);
     }
 
-    void render_tpl(DataNode const& n, Engine const& eng, Rope *rp)
+    void render_tpl(DataNode const& n, Engine const& eng, Rope *rp) const
     {
         *rp = eng.rope();
         eng.render(n, rp);
@@ -198,7 +203,7 @@ struct Generator
 
 struct EnumGenerator : public Generator
 {
-    void create_prop_tree(Originator const& o, DataNode *root) override final
+    void create_prop_tree(Originator const& o, DataNode *root) const override final
     {
 
     }
@@ -206,7 +211,7 @@ struct EnumGenerator : public Generator
 
 struct ClassGenerator : public Generator
 {
-    void create_prop_tree(Originator const& o, DataNode *root) override final
+    void create_prop_tree(Originator const& o, DataNode *root) const override final
     {
 
     }
@@ -229,6 +234,40 @@ struct SourceFile : public CodeEntity
     std::vector< Class > m_classes;
 
     std::vector< CodeChunk > m_chunks;
+    bool m_is_header;
+
+    SourceFile()
+    {
+    }
+
+    void setup()
+    {
+        cspan f = m_file;
+        m_is_header = false;
+        std::initializer_list< cspan > hdr_exts = {".h", ".hpp", ".hxx", ".h++", ".hh"};
+        for(auto &ext : hdr_exts)
+        {
+            if(f.ends_with(ext))
+            {
+                m_is_header = true;
+                break;
+            }
+        }
+        if( ! m_is_header)
+        {
+            bool gotit = false;
+            std::initializer_list< cspan > src_exts = {".c", ".cpp", ".cxx", ".c++", ".cc"};
+            for(auto &ext : src_exts)
+            {
+                if(f.ends_with(ext))
+                {
+                    gotit = true;
+                    break;
+                }
+            }
+            C4_ASSERT(gotit);
+        }
+    }
 
     void generate_class_code(ClassGenerator const& g)
     {
@@ -258,7 +297,7 @@ struct SourceFile : public CodeEntity
         {
             if( ! p.is_class)
             {
-                g.generate(m_enum[p.pos], &root, &m_chunks[count]);
+                g.generate(m_enums[p.pos], &root, &m_chunks[count]);
             }
             ++count;
         }
@@ -269,13 +308,13 @@ public:
     struct const_iterator
     {
         const_iterator(SourceFile const* s, size_t pos) : s(s), pos(pos) {}
-        SourceFile *s;
+        SourceFile const* s;
         size_t pos;
 
         using value_type = Originator const;
 
-        value_type& operator*  () const { C4_ASSERT(pos >= 0 && pos < m_pos.size()); auto &p = m_pos[pos]; return p.is_class ?  m_classes[p.pos] :  m_enums[p.pos]; }
-        value_type* operator-> () const { C4_ASSERT(pos >= 0 && pos < m_pos.size()); auto &p = m_pos[pos]; return p.is_class ? &m_classes[p.pos] : &m_enums[p.pos]; }
+        value_type& operator*  () const { C4_ASSERT(pos >= 0 && pos < s->m_pos.size()); auto &p = s->m_pos[pos]; return p.is_class ?  (Originator const&)s->m_classes[p.pos] :  (Originator const&)s->m_enums[p.pos]; }
+        value_type* operator-> () const { C4_ASSERT(pos >= 0 && pos < s->m_pos.size()); auto &p = s->m_pos[pos]; return p.is_class ? &(Originator const&)s->m_classes[p.pos] : &(Originator const&)s->m_enums[p.pos]; }
     };
 
     const_iterator begin() const { return const_iterator(this, 0); }
@@ -290,64 +329,78 @@ public:
 
 struct Writer
 {
-    virtual void write(SourceFile const& src) = 0;
 
-    static Writer* create(cspan type);
-};
+    typedef enum {
+        STDOUT,
+        GENFILE,
+        GENGROUP,
+        SAMEFILE,
+        SINGLEFILE,
+    } Type_e;
 
+    static Type_e get_type(cspan type_name)
+    {
+        if(type_name == "stdout")
+        {
+            return STDOUT;
+        }
+        else if(type_name == "samefile")
+        {
+            return SAMEFILE;
+        }
+        else if(type_name == "genfile")
+        {
+            return GENFILE;
+        }
+        else if(type_name == "gengroup")
+        {
+            return GENGROUP;
+        }
+        else if(type_name == "singlefile")
+        {
+            return SINGLEFILE;
+        }
+        else
+        {
+            C4_ERROR("unknown writer type");
+        }
+        return STDOUT;
+    }
 
-struct WriterStdOut : public Writer
-{
-    void write(SourceFile const& src) override final
+    Type_e m_type;
+
+    Writer(cspan type_name) : m_type(get_type(type_name))
     {
     }
-};
 
-struct WriterGenFile : public Writer
-{
-    void write(SourceFile const& src) override final
+    void write(SourceFile const& src) const
     {
+        std::set< std::string > output_names;
     }
-};
 
-struct WriterGenGroup : public Writer
-{
-    void write(SourceFile const& src) override final
-    {
-    }
-};
+    using set_type = std::set< std::string >;
 
-struct WriterSameFile : public Writer
-{
-    void write(SourceFile const& src) override final
+    void get_output_file_names(SourceFile const& src, set_type *output_names) const
     {
-    }
-};
-
-
-Writer* Writer::create(cspan type);
-{
-    if(type == "genfile")
-    {
-        return new WriterGenFile();
-    }
-    else if(type == "gengroup")
-    {
-        return new WriterGenGroup();
-    }
-    else if(type == "samefile")
-    {
-        return new WriterSameFile();
-    }
-    else if(type == "stdout")
-    {
-        return new WriterStdOut();
-    }
-    else
-    {
+        switch(m_type)
+        {
+        case STDOUT: break;
+        case SAMEFILE: output_names->insert(src.m_file); return;
+        case GENFILE: output_names->clear(); return;
+        case GENGROUP: output_names->clear(); return;
+        case SINGLEFILE: output_names->clear(); return;
+        }
         C4_ERROR("unknown writer type");
     }
-}
+
+    set_type get_output_file_names(SourceFile const& src) const
+    {
+        set_type ofn;
+        get_output_file_names(src, &ofn);
+        return ofn;
+    }
+
+};
 
 
 //-----------------------------------------------------------------------------
@@ -364,41 +417,64 @@ struct Regen
     std::vector< ClassGenerator > m_class_gens;
 
     std::vector< SourceFile > m_files;
-    std::unique_ptr< Writer > m_writer;
+
+    cspan m_writer_type;
+    Writer m_writer;
 
     void load_config_file(std::string const& file_name)
     {
         m_config_file_name = file_name;
-        cspan cfn(m_config_file_name.begin(), m_config_file_name.end());
-        file_get_contents(m_config_file_name.c_str(), m_config_file_yml);
-        parse(cfn, m_config_file_yml, &m_config_data);
+        file_get_contents(m_config_file_name.c_str(), &m_config_file_yml);
+        parse(to_span(m_config_file_name), to_span(m_config_file_yml), &m_config_data);
 
-        DataNode n = m_config_data.rootref();
+        DataNode n, r = m_config_data.rootref();
 
-        cspan writer_type;
-        m_config_data.get_if("writer", &writer_type, "genfile");
-        m_writer.reset(Writer::create(writer_type));
+        r.get_if("writer", &m_writer_type, cspan("stdout"));
+        m_writer = Writer(m_writer_type);
 
-        n = m_config_data.find_child("enum");
+        n = r.find_child("enum");
         if(n.valid())
         {
             for(auto const& ch : n.children())
             {
                 m_enum_gens.emplace_back();
                 auto &g = m_enum_gens.back();
-                g.load(ch):
+                g.load(ch);
             }
         }
 
-        n = m_config_data.find_child("class");
+        n = r.find_child("class");
         if(n.valid())
         {
             for(auto const& ch : n.children())
             {
                 m_class_gens.emplace_back();
-                auto &g = m_enum_class.back();
-                g.load(ch):
+                auto &g = m_class_gens.back();
+                g.load(ch);
             }
+        }
+    }
+
+    void generate_code()
+    {
+        for(auto & sf : m_files)
+        {
+            for(auto const& eg : m_enum_gens)
+            {
+                sf.generate_enum_code(eg);
+            }
+            for(auto const& cg : m_class_gens)
+            {
+                sf.generate_class_code(cg);
+            }
+        }
+    }
+
+    void output_code() const
+    {
+        for(auto const& sf : m_files)
+        {
+            m_writer.write(sf);
         }
     }
 
@@ -407,6 +483,14 @@ struct Regen
         return m_enum_gens.size() == 0 && m_class_gens.size() == 0;
     }
 
+    void print_output_file_names() const
+    {
+        Writer::set_type ofn;
+        for(auto const& sf : m_files)
+        {
+            m_writer.get_output_file_names(sf, &ofn);
+        }
+    }
 };
 
 } // namespace regen
